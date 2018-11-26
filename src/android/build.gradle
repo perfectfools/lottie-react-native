@@ -7,14 +7,14 @@ apply from: 'gradle-maven-push.gradle'
 
 
 android {
-  compileSdkVersion safeExtGet('compileSdkVersion', 26)
-  buildToolsVersion safeExtGet('buildToolsVersion', '26.0.3')
+  compileSdkVersion safeExtGet('compileSdkVersion', 27)
+  buildToolsVersion safeExtGet('buildToolsVersion', '27.0.3')
   resourcePrefix 'lottie_'
   //publishNonDefault true
 
   defaultConfig {
-    minSdkVersion safeExtGet('minSdkVersion', 16)
-    targetSdkVersion safeExtGet('targetSdkVersion', 26)
+    minSdkVersion safeExtGet('minSdkVersion', 19)
+    targetSdkVersion safeExtGet('targetSdkVersion', 27)
     versionCode 100
     versionName "2.8.0"
   }
