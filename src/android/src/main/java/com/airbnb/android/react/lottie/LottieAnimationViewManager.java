@@ -45,7 +45,7 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
   }
 
   @Override public LottieAnimationView createViewInstance(ThemedReactContext context) {
-    LottieAnimationView lview = new LottieAnimationView(context, this.blur);
+    LottieAnimationView lview = new LottieAnimationView(context);//, this.blur);
 
     //lview.setAdjustViewBounds(true);
     //lview.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -115,7 +115,7 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
 
   @ReactProp(name = "sourceName")
   public void setSourceName(LottieAnimationView view, String name) {
-    view.setAnimation(name,this.blur);
+    view.setAnimation(name);//,this.blur);
   }
 
   @ReactProp(name = "sourceJson")
@@ -123,7 +123,7 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
 
     try {
 
-      view.setAnimation(new JSONObject(json.toHashMap()),this.blur);
+      view.setAnimation(new JSONObject(json.toHashMap()));//,this.blur);
     } catch (Exception e) {
       // TODO: expose this to the user better. maybe an `onError` event?
       Log.e(TAG,"setSourceJsonError", e);
@@ -146,13 +146,13 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
   public void setProgress(LottieAnimationView view, float progress) {
     view.setProgress(progress);
   }
-
+/*
   @ReactProp(name = "blur")
   public void setBlurry(LottieAnimationView view, float blur) {
 
-    view.setBlur(blur);
-    this.blur = blur;
-  }
+//    view.setBlur(blur);
+  //  this.blur = blur;
+  }*/
 
   @ReactProp(name = "speed")
   public void setSpeed(LottieAnimationView view, double speed) {
