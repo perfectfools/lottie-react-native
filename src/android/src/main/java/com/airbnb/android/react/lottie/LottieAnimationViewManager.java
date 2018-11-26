@@ -3,23 +3,17 @@ package com.airbnb.android.react.lottie;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v4.view.ViewCompat;
+import android.view.View.OnAttachStateChangeListener;
+import android.view.View;
 
-import android.util.Log;
-import android.widget.ImageView;
-
-import com.airbnb.android.react.lottie.LottieAnimationView;
 import com.facebook.react.bridge.ReadableArray;
-import com.facebook.react.bridge.ReadableMap;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;
-
 import com.facebook.react.uimanager.ThemedReactContext;
 import com.facebook.react.uimanager.annotations.ReactProp;
 
-
-import org.json.JSONObject;
-
 import java.util.Map;
+import java.util.WeakHashMap;
 
 class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> {
   private static final String TAG = LottieAnimationViewManager.class.getSimpleName();
@@ -30,9 +24,11 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
   private static final int COMMAND_PAUSE = 3;
   private static final int COMMAND_RESUME = 4;
 
+  private Map<LottieAnimationView, LottieAnimationViewPropertyManager> propManagersMap = new WeakHashMap<>();
   private float blur = 0;
   public static final int defaultRadius = 10;
   public static final int defaultSampling = 10;
+
 
   @Override public Map<String, Object> getExportedViewConstants() {
     return MapBuilder.<String, Object>builder()
@@ -44,13 +40,14 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
     return REACT_CLASS;
   }
 
-  @Override public LottieAnimationView createViewInstance(ThemedReactContext context) {
-    LottieAnimationView lview = new LottieAnimationView(context);//, this.blur);
 
+  @Override public LottieAnimationView createViewInstance(ThemedReactContext context) {
+    LottieAnimationView view = new LottieAnimationView(context);
+    //view.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
     //lview.setAdjustViewBounds(true);
     //lview.setScaleType(ImageView.ScaleType.CENTER_CROP);
 
-    return lview;
+    return view;
   }
 
   @Override public Map<String, Integer> getCommandsMap() {
@@ -63,15 +60,34 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
   }
 
   @Override
-  public void receiveCommand(final LottieAnimationView view, int commandId, ReadableArray args) {
+  public void receiveCommand(final LottieAnimationView view, int commandId,final ReadableArray args) { //added final
     switch (commandId) {
       case COMMAND_PLAY: {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
           @Override public void run() {
+            int startFrame = args.getInt(0);
+            int endFrame = args.getInt(1);
+            if (startFrame != -1 && endFrame != -1) {
+              view.setMinAndMaxFrame(args.getInt(0), args.getInt(1));
+            }
             if (ViewCompat.isAttachedToWindow(view)) {
-              //view.setProgress(0f);
+              view.setProgress(0f);
               view.playAnimation();
+            } else {
+              view.addOnAttachStateChangeListener(new OnAttachStateChangeListener() {
+                @Override
+                public void onViewAttachedToWindow(View v) {
+                  LottieAnimationView view = (LottieAnimationView)v;
+                  view.setProgress(0f);
+                  view.playAnimation();
+                  view.removeOnAttachStateChangeListener(this);
+                }
 
+                @Override
+                public void onViewDetachedFromWindow(View v) {
+                  view.removeOnAttachStateChangeListener(this);
+                }
+              });
             }
           }
         });
@@ -115,57 +131,77 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
 
   @ReactProp(name = "sourceName")
   public void setSourceName(LottieAnimationView view, String name) {
-    view.setAnimation(name);//,this.blur);
+    getOrCreatePropertyManager(view).setAnimationName(name);
   }
 
   @ReactProp(name = "sourceJson")
-  public void setSourceJson(LottieAnimationView view, ReadableMap json) {
-
-    try {
-
-      view.setAnimation(new JSONObject(json.toHashMap()));//,this.blur);
-    } catch (Exception e) {
-      // TODO: expose this to the user better. maybe an `onError` event?
-      Log.e(TAG,"setSourceJsonError", e);
-    }
+  public void setSourceJson(LottieAnimationView view, String json) {
+    getOrCreatePropertyManager(view).setAnimationJson(json);
   }
 
   @ReactProp(name = "resizeMode")
   public void setResizeMode(LottieAnimationView view, String resizeMode) {
-
-    /*if ("cover".equals(resizeMode)) {
-      view.setScaleType(ImageView.ScaleType.CENTER_CROP);
+    /*ImageView.ScaleType mode = null;
+    if ("cover".equals(resizeMode)) {
+      mode = ImageView.ScaleType.CENTER_CROP;
     } else if ("contain".equals(resizeMode)) {
-      view.setScaleType(ImageView.ScaleType.CENTER_INSIDE);
+      mode = ImageView.ScaleType.CENTER_INSIDE;
     } else if ("center".equals(resizeMode)) {
-      view.setScaleType(ImageView.ScaleType.CENTER);
-    }*/
+      mode = ImageView.ScaleType.CENTER;
+    }
+    getOrCreatePropertyManager(view).setScaleType(mode);
+    */
   }
 
   @ReactProp(name = "progress")
   public void setProgress(LottieAnimationView view, float progress) {
-    view.setProgress(progress);
+    getOrCreatePropertyManager(view).setProgress(progress);
   }
-/*
-  @ReactProp(name = "blur")
-  public void setBlurry(LottieAnimationView view, float blur) {
-
-//    view.setBlur(blur);
-  //  this.blur = blur;
-  }*/
 
   @ReactProp(name = "speed")
   public void setSpeed(LottieAnimationView view, double speed) {
-    view.setSpeed((float) speed);
+    getOrCreatePropertyManager(view).setSpeed((float)speed);
   }
 
   @ReactProp(name = "loop")
   public void setLoop(LottieAnimationView view, boolean loop) {
-    view.loop(loop);
+    getOrCreatePropertyManager(view).setLoop(loop);
+  }
+
+  @ReactProp(name = "hardwareAccelerationAndroid")
+  public void setHardwareAcceleration(LottieAnimationView view, boolean use) {
+    getOrCreatePropertyManager(view).setUseHardwareAcceleration(use);
   }
 
   @ReactProp(name = "imageAssetsFolder")
   public void setImageAssetsFolder(LottieAnimationView view, String imageAssetsFolder) {
-    view.setImageAssetsFolder(imageAssetsFolder);
+    getOrCreatePropertyManager(view).setImageAssetsFolder(imageAssetsFolder);
+  }
+
+  @ReactProp(name = "enableMergePathsAndroidForKitKatAndAbove")
+  public void setEnableMergePaths(LottieAnimationView view, boolean enableMergePaths) {
+    getOrCreatePropertyManager(view).setEnableMergePaths(enableMergePaths);
+  }
+
+  @Override
+  protected void onAfterUpdateTransaction(LottieAnimationView view) {
+    super.onAfterUpdateTransaction(view);
+    getOrCreatePropertyManager(view).commitChanges();
+  }
+/*
+  @ReactProp(name = "blur")
+  public void setBlurry(LottieAnimationView view, float blur) {
+   // view.setBlur(blur);
+    this.blur = blur;
+  }
+*/
+
+  private LottieAnimationViewPropertyManager getOrCreatePropertyManager(LottieAnimationView view) {
+    LottieAnimationViewPropertyManager result = propManagersMap.get(view);
+    if (result == null) {
+      result = new LottieAnimationViewPropertyManager(view);
+      propManagersMap.put(view, result);
+    }
+    return result;
   }
 }
