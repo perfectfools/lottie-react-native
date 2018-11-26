@@ -1,10 +1,10 @@
-package com.airbnb.android.react.lottie.animation.keyframe;
+package com.airbnb.lottie.animation.keyframe;
 
-import com.airbnb.android.react.lottie.animation.Keyframe;
+import com.airbnb.android.react.lottie.value.Keyframe;
 
 import java.util.List;
 
-public abstract class KeyframeAnimation<T> extends BaseKeyframeAnimation<T, T> {
+abstract class KeyframeAnimation<T> extends BaseKeyframeAnimation<T, T> {
   KeyframeAnimation(List<? extends Keyframe<T>> keyframes) {
     super(keyframes);
   }

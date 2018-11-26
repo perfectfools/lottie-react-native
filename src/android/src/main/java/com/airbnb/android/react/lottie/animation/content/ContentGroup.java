@@ -1,26 +1,27 @@
-package com.airbnb.android.react.lottie.animation.content;
+package com.airbnb.lottie.animation.content;
 
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.RectF;
-import android.support.annotation.Nullable;
-import android.util.Log;
+import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.LottieDrawable;
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
 import com.airbnb.android.react.lottie.animation.keyframe.TransformKeyframeAnimation;
+import com.airbnb.android.react.lottie.model.KeyPath;
+import com.airbnb.android.react.lottie.model.KeyPathElement;
+import com.airbnb.android.react.lottie.model.animatable.AnimatableTransform;
 import com.airbnb.android.react.lottie.model.content.ContentModel;
 import com.airbnb.android.react.lottie.model.content.ShapeGroup;
 import com.airbnb.android.react.lottie.model.layer.BaseLayer;
-import com.airbnb.android.react.lottie.model.animatable.AnimatableTransform;
+import com.airbnb.android.react.lottie.value.LottieValueCallback;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ContentGroup implements DrawingContent, PathContent,
-    BaseKeyframeAnimation.AnimationListener {
+    BaseKeyframeAnimation.AnimationListener, KeyPathElement {
 
   private static List<Content> contentsFromModels(LottieDrawable drawable, BaseLayer layer,
       List<ContentModel> contentModels) {
@@ -91,31 +92,6 @@ public class ContentGroup implements DrawingContent, PathContent,
 
   @Override public String getName() {
     return name;
-  }
-
-  @Override public void setBlur(float blur){
-    for (int i = 0; i < contents.size(); i++) {
-      final Content content = contents.get(i);
-      if (content instanceof DrawingContent) {
-        final DrawingContent drawingContent = (DrawingContent) content;
-          drawingContent.setBlur(blur);
-      }
-    }
-  }
-
-  @Override public void addColorFilter(@Nullable String layerName, @Nullable String contentName,
-      @Nullable ColorFilter colorFilter) {
-    for (int i = 0; i < contents.size(); i++) {
-      final Content content = contents.get(i);
-      if (content instanceof DrawingContent) {
-        final DrawingContent drawingContent = (DrawingContent) content;
-        if (contentName == null || contentName.equals(content.getName())) {
-          drawingContent.addColorFilter(layerName, null, colorFilter);
-        } else {
-          drawingContent.addColorFilter(layerName, contentName, colorFilter);
-        }
-      }
-    }
   }
 
   @Override public void setContents(List<Content> contentsBefore, List<Content> contentsAfter) {
@@ -208,6 +184,39 @@ public class ContentGroup implements DrawingContent, PathContent,
           );
         }
       }
+    }
+  }
+
+  @Override public void resolveKeyPath(
+      KeyPath keyPath, int depth, List<KeyPath> accumulator, KeyPath currentPartialKeyPath) {
+    if (!keyPath.matches(getName(), depth)) {
+      return;
+    }
+
+    if (!"__container".equals(getName())) {
+      currentPartialKeyPath = currentPartialKeyPath.addKey(getName());
+
+      if (keyPath.fullyResolvesTo(getName(), depth)) {
+        accumulator.add(currentPartialKeyPath.resolve(this));
+      }
+    }
+
+    if (keyPath.propagateToChildren(getName(), depth)) {
+      int newDepth = depth + keyPath.incrementDepthBy(getName(), depth);
+      for (int i = 0; i < contents.size(); i++) {
+        Content content = contents.get(i);
+        if (content instanceof KeyPathElement) {
+          KeyPathElement element = (KeyPathElement) content;
+          element.resolveKeyPath(keyPath, newDepth, accumulator, currentPartialKeyPath);
+        }
+      }
+    }
+  }
+
+  @Override
+  public <T> void addValueCallback(T property, @Nullable LottieValueCallback<T> callback) {
+    if (transformAnimation != null) {
+      transformAnimation.applyValueCallback(property, callback);
     }
   }
 }

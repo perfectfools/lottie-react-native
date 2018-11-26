@@ -9,24 +9,36 @@ import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.support.annotation.FloatRange;
-import android.support.annotation.IntRange;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import androidx.annotation.FloatRange;
+import androidx.annotation.IntDef;
+import androidx.annotation.IntRange;
+import androidx.annotation.MainThread;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import android.util.Log;
 import android.view.View;
 
 import com.airbnb.android.react.lottie.manager.FontAssetManager;
 import com.airbnb.android.react.lottie.manager.ImageAssetManager;
+import com.airbnb.android.react.lottie.model.KeyPath;
 import com.airbnb.android.react.lottie.model.layer.CompositionLayer;
-import com.airbnb.android.react.lottie.model.layer.Layer;
+import com.airbnb.android.react.lottie.parser.LayerParser;
 import com.airbnb.android.react.lottie.utils.LottieValueAnimator;
+import com.airbnb.android.react.lottie.utils.MiscUtils;
+import com.airbnb.android.react.lottie.value.LottieFrameInfo;
+import com.airbnb.android.react.lottie.value.LottieValueCallback;
+import com.airbnb.android.react.lottie.value.SimpleLottieValueCallback;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -34,11 +46,12 @@ import java.util.Set;
  * If there are masks or mattes, then you MUST call {@link #recycleBitmaps()} when you are done
  * or else you will leak bitmaps.
  * <p>
- * It is preferable to use {@link com.airbnb.android.react.lottie.LottieAnimationView} when possible because it
+ * It is preferable to use {@link com.airbnb.lottie.LottieAnimationView} when possible because it
  * handles bitmap recycling and asynchronous loading
  * of compositions.
  */
-@SuppressWarnings({"WeakerAccess", "unused"}) public class LottieDrawable extends Drawable implements Drawable.Callback {
+@SuppressWarnings({"WeakerAccess", "unused"})
+public class LottieDrawable extends Drawable implements Drawable.Callback, Animatable {
   private static final String TAG = LottieDrawable.class.getSimpleName();
 
   private interface LazyCompositionTask {
@@ -61,14 +74,33 @@ import java.util.Set;
   private boolean enableMergePaths;
   @Nullable private CompositionLayer compositionLayer;
   private int alpha = 255;
-  private float blur = 0;
   private boolean performanceTrackingEnabled;
+
+  @IntDef({RESTART, REVERSE})
+  @Retention(RetentionPolicy.SOURCE)
+  public @interface RepeatMode {}
+
+  /**
+   * When the animation reaches the end and <code>repeatCount</code> is INFINITE
+   * or a positive value, the animation restarts from the beginning.
+   */
+  public static final int RESTART = ValueAnimator.RESTART;
+  /**
+   * When the animation reaches the end and <code>repeatCount</code> is INFINITE
+   * or a positive value, the animation reverses direction on every iteration.
+   */
+  public static final int REVERSE = ValueAnimator.REVERSE;
+  /**
+   * This value used used with the {@link #setRepeatCount(int)} property to repeat
+   * the animation indefinitely.
+   */
+  public static final int INFINITE = ValueAnimator.INFINITE;
 
   public LottieDrawable() {
     animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
       @Override public void onAnimationUpdate(ValueAnimator animation) {
         if (compositionLayer != null) {
-          compositionLayer.setProgress(animator.getValue());
+          compositionLayer.setProgress(animator.getAnimatedValueAbsolute());
         }
       }
     });
@@ -100,6 +132,10 @@ import java.util.Set;
    * instead of using merge paths.
    */
   public void enableMergePathsForKitKatAndAbove(boolean enable) {
+    if (enableMergePaths == enable) {
+      return;
+    }
+
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
       Log.w(TAG, "Merge paths are not supported pre-Kit Kat.");
       return;
@@ -108,6 +144,10 @@ import java.util.Set;
     if (composition != null) {
       buildCompositionLayer();
     }
+  }
+
+  public boolean isMergePathsEnabledForKitKatAndAbove() {
+    return enableMergePaths;
   }
 
   /**
@@ -122,6 +162,12 @@ import java.util.Set;
    * If you use LottieDrawable directly, you MUST call {@link #recycleBitmaps()} when you
    * are done. Calling {@link #recycleBitmaps()} doesn't have to be final and {@link LottieDrawable}
    * will recreate the bitmaps if needed but they will leak if you don't recycle them.
+   *
+   * Be wary if you are using many images, however. Lottie is designed to work with vector shapes
+   * from After Effects. If your images look like they could be represented with vector shapes,
+   * see if it is possible to convert them to shape layers and re-export your animation. Check
+   * the documentation at http://airbnb.io/lottie for more information about importing shapes from
+   * Sketch or Illustrator to avoid this.
    */
   public void setImagesAssetsFolder(@Nullable String imageAssetsFolder) {
     this.imageAssetsFolder = imageAssetsFolder;
@@ -145,6 +191,8 @@ import java.util.Set;
   }
 
   /**
+   * Create a composition with {@link LottieCompositionFactory}
+   *
    * @return True if the composition is different from the previously set composition, false otherwise.
    */
   public boolean setComposition(LottieComposition composition) {
@@ -155,11 +203,10 @@ import java.util.Set;
     clearComposition();
     this.composition = composition;
     buildCompositionLayer();
-    animator.setCompositionDuration(composition.getDuration());
-    setProgress(animator.getValue());
+    animator.setComposition(composition);
+    setProgress(animator.getAnimatedFraction());
     setScale(scale);
     updateBounds();
-    applyColorFilters();
 
     // We copy the tasks to a new ArrayList so that if this method is called from multiple threads,
     // then there won't be two iterators iterating and removing at the same time.
@@ -193,17 +240,7 @@ import java.util.Set;
 
   private void buildCompositionLayer() {
     compositionLayer = new CompositionLayer(
-        this, Layer.Factory.newInstance(composition), composition.getLayers(), composition);
-  }
-
-  private void applyColorFilters() {
-    if (compositionLayer == null) {
-      return;
-    }
-
-    for (ColorFilterData data : colorFilterData) {
-      compositionLayer.addColorFilter(data.layerName, data.contentName, data.colorFilter);
-    }
+        this, LayerParser.parse(composition), composition.getLayers(), composition);
   }
 
   public void clearComposition() {
@@ -214,6 +251,7 @@ import java.util.Set;
     composition = null;
     compositionLayer = null;
     imageAssetManager = null;
+    animator.clearComposition();
     invalidateSelf();
   }
 
@@ -227,81 +265,13 @@ import java.util.Set;
   @Override public void setAlpha(@IntRange(from = 0, to = 255) int alpha) {
     this.alpha = alpha;
   }
-  /*
-  public void setBlur(float blur) {
-    this.blur = blur;
-  }*/
 
-  public float getBlur() {
-    return this.blur;
-  }
   @Override public int getAlpha() {
     return alpha;
   }
 
   @Override public void setColorFilter(@Nullable ColorFilter colorFilter) {
-    throw new UnsupportedOperationException("Use addColorFilter instead.");
-  }
-
-  /**
-   * Add a color filter to specific content on a specific layer.
-   * @param layerName name of the layer where the supplied content name lives
-   * @param contentName name of the specific content that the color filter is to be applied
-   * @param colorFilter the color filter, null to clear the color filter
-   */
-  public void addColorFilterToContent(String layerName, String contentName,
-      @Nullable ColorFilter colorFilter) {
-    addColorFilterInternal(layerName, contentName, colorFilter);
-  }
-
-  /**
-   * Add a color filter to a whole layer
-   * @param layerName name of the layer that the color filter is to be applied
-   * @param colorFilter the color filter, null to clear the color filter
-   */
-  public void addColorFilterToLayer(String layerName, @Nullable ColorFilter colorFilter) {
-    addColorFilterInternal(layerName, null, colorFilter);
-  }
-
-  /**
-   * Add a color filter to all layers
-   * @param colorFilter the color filter, null to clear all color filters
-   */
-  public void addColorFilter(ColorFilter colorFilter) {
-    addColorFilterInternal(null, null, colorFilter);
-  }
-
-  /**
-   * Clear all color filters on all layers and all content in the layers
-   */
-  public void clearColorFilters() {
-    colorFilterData.clear();
-    addColorFilterInternal(null, null, null);
-  }
-
-  /**
-   * Private method to capture all color filter additions.
-   * There are 3 different behaviors here.
-   * 1. layerName is null. All layers supporting color filters will apply the passed in color filter
-   * 2. layerName is not null, contentName is null. This will apply the passed in color filter
-   *    to the whole layer
-   * 3. layerName is not null, contentName is not null. This will apply the pass in color filter
-   *    to a specific composition content.
-   */
-  private void addColorFilterInternal(@Nullable String layerName, @Nullable String contentName,
-      @Nullable ColorFilter colorFilter) {
-    final ColorFilterData data = new ColorFilterData(layerName, contentName, colorFilter);
-    if (colorFilter == null && colorFilterData.contains(data)) {
-      colorFilterData.remove(data);
-    } else {
-      colorFilterData.add(new ColorFilterData(layerName, contentName, colorFilter));
-    }
-
-    if (compositionLayer == null) {
-      return;
-    }
-
-    compositionLayer.addColorFilter(layerName, contentName, colorFilter);
+    Log.w(L.TAG, "Use addColorFilter instead.");
   }
 
   @Override public int getOpacity() {
@@ -342,7 +312,6 @@ import java.util.Set;
           getScale() * halfWidth - scaledHalfWidth,
           getScale() * halfHeight - scaledHalfHeight);
       canvas.scale(extraScale, extraScale, scaledHalfWidth, scaledHalfHeight);
-
     }
 
     matrix.reset();
@@ -357,10 +326,25 @@ import java.util.Set;
 
 // <editor-fold desc="animator">
 
+  @MainThread
+  @Override public void start() {
+    playAnimation();
+  }
+
+  @MainThread
+  @Override public void stop() {
+    endAnimation();
+  }
+
+  @Override public boolean isRunning() {
+    return isAnimating();
+  }
+
   /**
    * Plays the animation from the beginning. If speed is < 0, it will start at the end
    * and play towards the beginning
    */
+  @MainThread
   public void playAnimation() {
     if (compositionLayer == null) {
       lazyCompositionTasks.add(new LazyCompositionTask() {
@@ -373,10 +357,17 @@ import java.util.Set;
     animator.playAnimation();
   }
 
+  @MainThread
+  public void endAnimation() {
+    lazyCompositionTasks.clear();
+    animator.endAnimation();
+  }
+
   /**
    * Continues playing the animation from its current position. If speed < 0, it will play backwards
    * from the current position.
    */
+  @MainThread
   public void resumeAnimation() {
     if (compositionLayer == null) {
       lazyCompositionTasks.add(new LazyCompositionTask() {
@@ -395,20 +386,36 @@ import java.util.Set;
   public void setMinFrame(final int minFrame) {
     if (composition == null) {
       lazyCompositionTasks.add(new LazyCompositionTask() {
-        @Override public void run(LottieComposition composition) {
+        @Override
+        public void run(LottieComposition composition) {
           setMinFrame(minFrame);
         }
       });
       return;
     }
-    setMinProgress(minFrame / composition.getDurationFrames());
+    animator.setMinFrame(minFrame);
+  }
+
+  /**
+   * Returns the minimum frame set by {@link #setMinFrame(int)} or {@link #setMinProgress(float)}
+   */
+  public float getMinFrame() {
+    return animator.getMinFrame();
   }
 
   /**
    * Sets the minimum progress that the animation will start from when playing or looping.
    */
-   public void setMinProgress(float minProgress) {
-    animator.setMinValue(minProgress);
+   public void setMinProgress(final float minProgress) {
+     if (composition == null) {
+       lazyCompositionTasks.add(new LazyCompositionTask() {
+         @Override public void run(LottieComposition composition) {
+           setMinProgress(minProgress);
+         }
+       });
+       return;
+     }
+   setMinFrame((int) MiscUtils.lerp(composition.getStartFrame(), composition.getEndFrame(), minProgress));
   }
 
   /**
@@ -417,29 +424,53 @@ import java.util.Set;
   public void setMaxFrame(final int maxFrame) {
     if (composition == null) {
       lazyCompositionTasks.add(new LazyCompositionTask() {
-        @Override public void run(LottieComposition composition) {
+        @Override
+        public void run(LottieComposition composition) {
           setMaxFrame(maxFrame);
         }
       });
       return;
     }
-    setMaxProgress(maxFrame / composition.getDurationFrames());
+    animator.setMaxFrame(maxFrame);
+  }
+
+  /**
+   * Returns the maximum frame set by {@link #setMaxFrame(int)} or {@link #setMaxProgress(float)}
+   */
+  public float getMaxFrame() {
+    return animator.getMaxFrame();
   }
 
   /**
    * Sets the maximum progress that the animation will end at when playing or looping.
    */
-  public void setMaxProgress(@FloatRange(from = 0f, to = 1f) float maxProgress) {
-    animator.setMaxValue(maxProgress);
+  public void setMaxProgress(@FloatRange(from = 0f, to = 1f) final float maxProgress) {
+    if (composition == null) {
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override public void run(LottieComposition composition) {
+          setMaxProgress(maxProgress);
+        }
+      });
+      return;
+    }
+    setMaxFrame((int) MiscUtils.lerp(composition.getStartFrame(), composition.getEndFrame(), maxProgress));
   }
 
   /**
    * @see #setMinFrame(int)
    * @see #setMaxFrame(int)
    */
-  public void setMinAndMaxFrame(int minFrame, int maxFrame) {
-    setMinFrame(minFrame);
-    setMaxFrame(maxFrame);
+  public void setMinAndMaxFrame(final int minFrame, final int maxFrame) {
+    if (composition == null) {
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override
+        public void run(LottieComposition composition) {
+          setMinAndMaxFrame(minFrame, maxFrame);
+        }
+      });
+      return;
+    }
+    animator.setMinAndMaxFrames(minFrame, maxFrame);
   }
 
   /**
@@ -447,10 +478,19 @@ import java.util.Set;
    * @see #setMaxProgress(float)
    */
   public void setMinAndMaxProgress(
-      @FloatRange(from = 0f, to = 1f) float minProgress,
-      @FloatRange(from = 0f, to = 1f) float maxProgress) {
-    setMinProgress(minProgress);
-    setMaxProgress(maxProgress);
+      @FloatRange(from = 0f, to = 1f) final float minProgress,
+      @FloatRange(from = 0f, to = 1f) final float maxProgress) {
+    if (composition == null) {
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override public void run(LottieComposition composition) {
+          setMinAndMaxProgress(minProgress, maxProgress);
+        }
+      });
+      return;
+    }
+
+    setMinAndMaxFrame((int) MiscUtils.lerp(composition.getStartFrame(), composition.getEndFrame(), minProgress),
+                      (int) MiscUtils.lerp(composition.getStartFrame(), composition.getEndFrame(), maxProgress));
   }
 
   /**
@@ -485,12 +525,20 @@ import java.util.Set;
     animator.removeUpdateListener(updateListener);
   }
 
+  public void removeAllUpdateListeners() {
+    animator.removeAllUpdateListeners();
+  }
+
   public void addAnimatorListener(Animator.AnimatorListener listener) {
     animator.addListener(listener);
   }
 
   public void removeAnimatorListener(Animator.AnimatorListener listener) {
     animator.removeListener(listener);
+  }
+
+  public void removeAllAnimatorListeners() {
+    animator.removeAllListeners();
   }
 
   /**
@@ -508,37 +556,80 @@ import java.util.Set;
       return;
     }
 
-    setProgress(frame / composition.getDurationFrames());
+    animator.setFrame(frame);
   }
 
   /**
    * Get the currently rendered frame.
    */
   public int getFrame() {
+    return (int) animator.getFrame();
+  }
+
+  public void setProgress(@FloatRange(from = 0f, to = 1f) final float progress) {
     if (composition == null) {
-      return 0;
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override public void run(LottieComposition composition) {
+          setProgress(progress);
+        }
+      });
+      return;
     }
-
-    return (int) (getProgress() * composition.getDurationFrames());
+    setFrame((int) MiscUtils.lerp(composition.getStartFrame(), composition.getEndFrame(), progress));
   }
 
-  public void setBlur(float blur) {
-    this.blur = blur;
-    if (compositionLayer != null) {
-      compositionLayer.setBlur(blur);
-    }
-  }
-
-  public void setProgress(@FloatRange(from = 0f, to = 1f) float progress) {
-    animator.setValue(progress);
-    if (compositionLayer != null) {
-      compositionLayer.setProgress(progress);
-    }
-  }
-
+  /**
+   *
+   * @see #setRepeatCount(int)
+   */
+  @Deprecated
   public void loop(boolean loop) {
     animator.setRepeatCount(loop ? ValueAnimator.INFINITE : 0);
   }
+
+  /**
+   * Defines what this animation should do when it reaches the end. This
+   * setting is applied only when the repeat count is either greater than
+   * 0 or {@link #INFINITE}. Defaults to {@link #RESTART}.
+   *
+   * @param mode {@link #RESTART} or {@link #REVERSE}
+   */
+  public void setRepeatMode(@RepeatMode int mode) {
+      animator.setRepeatMode(mode);
+  }
+
+  /**
+   * Defines what this animation should do when it reaches the end.
+   *
+   * @return either one of {@link #REVERSE} or {@link #RESTART}
+   */
+  @RepeatMode
+  public int getRepeatMode() {
+    return animator.getRepeatMode();
+  }
+
+  /**
+   * Sets how many times the animation should be repeated. If the repeat
+   * count is 0, the animation is never repeated. If the repeat count is
+   * greater than 0 or {@link #INFINITE}, the repeat mode will be taken
+   * into account. The repeat count is 0 by default.
+   *
+   * @param count the number of times the animation should be repeated
+   */
+  public void setRepeatCount(int count) {
+    animator.setRepeatCount(count);
+  }
+
+  /**
+   * Defines how many times the animation should repeat. The default value
+   * is 0.
+   *
+   * @return the number of times the animation should repeat, or {@link #INFINITE}
+   */
+  public int getRepeatCount() {
+    return animator.getRepeatCount();
+  }
+
 
   public boolean isLooping() {
     return animator.getRepeatCount() == ValueAnimator.INFINITE;
@@ -546,10 +637,6 @@ import java.util.Set;
 
   public boolean isAnimating() {
     return animator.isRunning();
-  }
-
-  void systemAnimationsAreDisabled() {
-    animator.systemAnimationsAreDisabled();
   }
 
 // </editor-fold>
@@ -562,6 +649,9 @@ import java.util.Set;
    * animation down then rendering it in a larger ImageView and letting ImageView scale it back up
    * with a scaleType such as centerInside will yield better performance with little perceivable
    * quality loss.
+   *
+   * You can also use a fixed view width/height in conjunction with the normal ImageView
+   * scaleTypes centerCrop and centerInside.
    */
   public void setScale(float scale) {
     this.scale = scale;
@@ -572,6 +662,12 @@ import java.util.Set;
    * Use this if you can't bundle images with your app. This may be useful if you download the
    * animations from the network or have the images saved to an SD Card. In that case, Lottie
    * will defer the loading of the bitmap to this delegate.
+   *
+   * Be wary if you are using many images, however. Lottie is designed to work with vector shapes
+   * from After Effects. If your images look like they could be represented with vector shapes,
+   * see if it is possible to convert them to shape layers and re-export your animation. Check
+   * the documentation at http://airbnb.io/lottie for more information about importing shapes from
+   * Sketch or Illustrator to avoid this.
    */
   public void setImageAssetDelegate(
       @SuppressWarnings("NullableProblems") ImageAssetDelegate assetDelegate) {
@@ -633,7 +729,7 @@ import java.util.Set;
 
   @FloatRange(from = 0f, to = 1f)
   public float getProgress() {
-    return animator.getValue();
+    return animator.getAnimatedValueAbsolute();
   }
 
   @Override public int getIntrinsicWidth() {
@@ -643,6 +739,80 @@ import java.util.Set;
   @Override public int getIntrinsicHeight() {
     return composition == null ? -1 : (int) (composition.getBounds().height() * getScale());
   }
+
+  /**
+   * Takes a {@link KeyPath}, potentially with wildcards or globstars and resolve it to a list of
+   * zero or more actual {@link KeyPath Keypaths} that exist in the current animation.
+   *
+   * If you want to set value callbacks for any of these values, it is recommend to use the
+   * returned {@link KeyPath} objects because they will be internally resolved to their content
+   * and won't trigger a tree walk of the animation contents when applied.
+   */
+  public List<KeyPath> resolveKeyPath(KeyPath keyPath) {
+    if (compositionLayer == null) {
+      Log.w(L.TAG, "Cannot resolve KeyPath. Composition is not set yet.");
+      return Collections.emptyList();
+    }
+    List<KeyPath> keyPaths = new ArrayList<>();
+    compositionLayer.resolveKeyPath(keyPath, 0, keyPaths, new KeyPath());
+    return keyPaths;
+  }
+
+  /**
+   * Add an property callback for the specified {@link KeyPath}. This {@link KeyPath} can resolve
+   * to multiple contents. In that case, the callbacks's value will apply to all of them.
+   *
+   * Internally, this will check if the {@link KeyPath} has already been resolved with
+   * {@link #resolveKeyPath(KeyPath)} and will resolve it if it hasn't.
+   */
+  public <T> void addValueCallback(
+      final KeyPath keyPath, final T property, final LottieValueCallback<T> callback) {
+    if (compositionLayer == null) {
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override public void run(LottieComposition composition) {
+          addValueCallback(keyPath, property, callback);
+        }
+      });
+      return;
+    }
+    boolean invalidate;
+    if (keyPath.getResolvedElement() != null) {
+      keyPath.getResolvedElement().addValueCallback(property, callback);
+      invalidate = true;
+    } else {
+      List<KeyPath> elements = resolveKeyPath(keyPath);
+
+      for (int i = 0; i < elements.size(); i++) {
+        //noinspection ConstantConditions
+        elements.get(i).getResolvedElement().addValueCallback(property, callback);
+      }
+      invalidate = !elements.isEmpty();
+    }
+    if (invalidate) {
+      invalidateSelf();
+      if (property == LottieProperty.TIME_REMAP) {
+        // Time remapping values are read in setProgress. In order for the new value
+        // to apply, we have to re-set the progress with the current progress so that the
+        // time remapping can be reapplied.
+        setProgress(getProgress());
+      }
+    }
+  }
+
+  /**
+   * Overload of {@link #addValueCallback(KeyPath, Object, LottieValueCallback)} that takes an interface. This allows you to use a single abstract
+   * method code block in Kotlin such as:
+   * drawable.addValueCallback(yourKeyPath, LottieProperty.COLOR) { yourColor }
+   */
+  public <T> void addValueCallback(KeyPath keyPath, T property,
+      final SimpleLottieValueCallback<T> callback) {
+    addValueCallback(keyPath, property, new LottieValueCallback<T>() {
+      @Override public T getValue(LottieFrameInfo<T> frameInfo) {
+        return callback.getValue(frameInfo);
+      }
+    });
+  }
+
 
   /**
    * Allows you to modify or clear a bitmap that was loaded for an image either automatically
@@ -658,8 +828,6 @@ import java.util.Set;
         "which prevents Lottie from getting a Context.");
       return null;
     }
-
-
     Bitmap ret = bm.updateBitmap(id, bitmap);
     invalidateSelf();
     return ret;

@@ -1,4 +1,4 @@
-package com.airbnb.android.react.lottie.animation.content;
+package com.airbnb.lottie.animation.content;
 
 import java.util.ListIterator;
 
@@ -7,7 +7,7 @@ import java.util.ListIterator;
  * For example, merge paths will absorb the shapes above it and repeaters will absorb the content
  * above it.
  */
-public interface GreedyContent {
+interface GreedyContent {
   /**
    * An iterator of contents that can be used to take ownership of contents. If ownership is taken,
    * the content should be removed from the iterator.

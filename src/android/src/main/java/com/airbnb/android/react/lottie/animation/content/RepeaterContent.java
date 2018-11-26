@@ -1,27 +1,28 @@
-package com.airbnb.android.react.lottie.animation.content;
+package com.airbnb.lottie.animation.content;
 
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.RectF;
-import android.support.annotation.Nullable;
-import android.util.Log;
+import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.LottieDrawable;
+import com.airbnb.android.react.lottie.LottieProperty;
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
 import com.airbnb.android.react.lottie.animation.keyframe.TransformKeyframeAnimation;
+import com.airbnb.android.react.lottie.model.KeyPath;
 import com.airbnb.android.react.lottie.model.content.Repeater;
 import com.airbnb.android.react.lottie.model.layer.BaseLayer;
 import com.airbnb.android.react.lottie.utils.MiscUtils;
+import com.airbnb.android.react.lottie.value.LottieValueCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 
-public class RepeaterContent implements
-    DrawingContent, PathContent, GreedyContent, BaseKeyframeAnimation.AnimationListener {
+public class RepeaterContent implements DrawingContent, PathContent, GreedyContent,
+    BaseKeyframeAnimation.AnimationListener, KeyPathElementContent {
   private final Matrix matrix = new Matrix();
   private final Path path = new Path();
 
@@ -50,9 +51,7 @@ public class RepeaterContent implements
     transform.addAnimationsToLayer(layer);
     transform.addListener(this);
   }
-  @Override public void setBlur(float blur){
 
-  }
   @Override public void absorbContent(ListIterator<Content> contentsIter) {
     // This check prevents a repeater from getting added twice.
     // This can happen in the following situation:
@@ -121,12 +120,26 @@ public class RepeaterContent implements
     contentGroup.getBounds(outBounds, parentMatrix);
   }
 
-  @Override public void addColorFilter(@Nullable String layerName, @Nullable String contentName,
-      @Nullable ColorFilter colorFilter) {
-    contentGroup.addColorFilter(layerName, contentName, colorFilter);
-  }
-
   @Override public void onValueChanged() {
     lottieDrawable.invalidateSelf();
+  }
+
+  @Override public void resolveKeyPath(
+      KeyPath keyPath, int depth, List<KeyPath> accumulator, KeyPath currentPartialKeyPath) {
+    MiscUtils.resolveKeyPath(keyPath, depth, accumulator, currentPartialKeyPath, this);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> void addValueCallback(T property, @Nullable LottieValueCallback<T> callback) {
+    if (transform.applyValueCallback(property, callback)) {
+      return;
+    }
+
+    if (property == LottieProperty.REPEATER_COPIES) {
+      copies.setValueCallback((LottieValueCallback<Float>) callback);
+    } else if (property == LottieProperty.REPEATER_OFFSET) {
+      offset.setValueCallback((LottieValueCallback<Float>) callback);
+    }
   }
 }

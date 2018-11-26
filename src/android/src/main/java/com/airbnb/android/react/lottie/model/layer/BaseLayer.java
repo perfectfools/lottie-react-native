@@ -1,19 +1,11 @@
-package com.airbnb.android.react.lottie.model.layer;
+package com.airbnb.lottie.model.layer;
 
 import android.annotation.SuppressLint;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.Matrix;
-import android.graphics.Paint;
-import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffXfermode;
-import android.graphics.RectF;
-import android.support.annotation.CallSuper;
-import android.support.annotation.FloatRange;
-import android.support.annotation.Nullable;
-import android.util.Log;
-
+import android.graphics.*;
+import android.os.Build;
+import androidx.annotation.CallSuper;
+import androidx.annotation.FloatRange;
+import androidx.annotation.Nullable;
 import com.airbnb.android.react.lottie.L;
 import com.airbnb.android.react.lottie.LottieComposition;
 import com.airbnb.android.react.lottie.LottieDrawable;
@@ -22,17 +14,26 @@ import com.airbnb.android.react.lottie.animation.content.DrawingContent;
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
 import com.airbnb.android.react.lottie.animation.keyframe.FloatKeyframeAnimation;
 import com.airbnb.android.react.lottie.animation.keyframe.MaskKeyframeAnimation;
-import com.airbnb.android.react.lottie.animation.keyframe.StaticKeyframeAnimation;
 import com.airbnb.android.react.lottie.animation.keyframe.TransformKeyframeAnimation;
+import com.airbnb.android.react.lottie.model.KeyPath;
+import com.airbnb.android.react.lottie.model.KeyPathElement;
 import com.airbnb.android.react.lottie.model.content.Mask;
+import com.airbnb.android.react.lottie.value.LottieValueCallback;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation.AnimationListener {
-  private static final int SAVE_FLAGS = Canvas.CLIP_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG |
-      Canvas.MATRIX_SAVE_FLAG;
+public abstract class BaseLayer
+    implements DrawingContent, BaseKeyframeAnimation.AnimationListener, KeyPathElement {
+  /**
+   * These flags were in Canvas but they were deprecated and removed.
+   * TODO: test removing these on older versions of Android.
+   */
+    private static final int CLIP_SAVE_FLAG = 0x02;
+    private static final int CLIP_TO_LAYER_SAVE_FLAG = 0x10;
+    private static final int MATRIX_SAVE_FLAG = 0x01;
+    private static final int SAVE_FLAGS = CLIP_SAVE_FLAG | CLIP_TO_LAYER_SAVE_FLAG | MATRIX_SAVE_FLAG;
 
   @Nullable
   static BaseLayer forModel(
@@ -46,7 +47,7 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
       case Solid:
         return new SolidLayer(drawable, layerModel);
       case Image:
-        return new ImageLayer(drawable, layerModel, composition.getDpScale());
+        return new ImageLayer(drawable, layerModel);
       case Null:
         return new NullLayer(drawable, layerModel);
       case Text:
@@ -54,7 +55,7 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
       case Unknown:
       default:
         // Do nothing
-        Log.w(L.TAG, "Unknown layer type " + layerModel.getLayerType());
+        L.warn("Unknown layer type " + layerModel.getLayerType());
         return null;
     }
   }
@@ -62,7 +63,8 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
   private final Path path = new Path();
   private final Matrix matrix = new Matrix();
   private final Paint contentPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-  private final Paint maskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+  private final Paint addMaskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+  private final Paint subtractMaskPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
   private final Paint mattePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
   private final Paint clearPaint = new Paint();
   private final RectF rect = new RectF();
@@ -87,7 +89,8 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
     this.layerModel = layerModel;
     drawTraceName = layerModel.getName() + "#draw";
     clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
-    maskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+    addMaskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
+    subtractMaskPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
     if (layerModel.getMatteType() == Layer.MatteType.Invert) {
       mattePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
     } else {
@@ -96,12 +99,12 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
 
     this.transform = layerModel.getTransform().createAnimation();
     transform.addListener(this);
-    transform.addAnimationsToLayer(this);
 
     if (layerModel.getMasks() != null && !layerModel.getMasks().isEmpty()) {
       this.mask = new MaskKeyframeAnimation(layerModel.getMasks());
       for (BaseKeyframeAnimation<?, Path> animation : mask.getMaskAnimations()) {
-        addAnimation(animation);
+        // Don't call addAnimation() because progress gets set manually in setProgress to
+        // properly handle time scale.
         animation.addUpdateListener(this);
       }
       for (BaseKeyframeAnimation<Integer, Integer> animation : mask.getOpacityAnimations()) {
@@ -153,10 +156,19 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
     lottieDrawable.invalidateSelf();
   }
 
-  public void addAnimation(BaseKeyframeAnimation<?, ?> newAnimation) {
-    if (!(newAnimation instanceof StaticKeyframeAnimation)) {
-      animations.add(newAnimation);
+  @SuppressLint("WrongConstant")
+  private void saveLayerCompat(Canvas canvas, RectF rect, Paint paint, boolean all) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+      // This method was deprecated in API level 26 and not recommended since 22, but its
+      // 2-parameter replacement is only available starting at API level 21.
+      canvas.saveLayer(rect, paint, all ? Canvas.ALL_SAVE_FLAG : SAVE_FLAGS);
+    } else {
+      canvas.saveLayer(rect, paint);
     }
+  }
+
+  public void addAnimation(BaseKeyframeAnimation<?, ?> newAnimation) {
+    animations.add(newAnimation);
   }
 
   @CallSuper @Override public void getBounds(RectF outBounds, Matrix parentMatrix) {
@@ -164,7 +176,7 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
     boundsMatrix.preConcat(transform.getMatrix());
   }
 
-  @SuppressLint("WrongConstant") @Override
+  @Override
   public void draw(Canvas canvas, Matrix parentMatrix, int parentAlpha) {
     L.beginSection(drawTraceName);
     if (!visible) {
@@ -202,7 +214,7 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
     L.endSection("Layer#computeBounds");
 
     L.beginSection("Layer#saveLayer");
-    canvas.saveLayer(rect, contentPaint, Canvas.ALL_SAVE_FLAG);
+    saveLayerCompat(canvas, rect, contentPaint, true);
     L.endSection("Layer#saveLayer");
 
     // Clear the off screen buffer. This is necessary for some phones.
@@ -218,7 +230,7 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
     if (hasMatteOnThisLayer()) {
       L.beginSection("Layer#drawMatte");
       L.beginSection("Layer#saveLayer");
-      canvas.saveLayer(rect, mattePaint, SAVE_FLAGS);
+      saveLayerCompat(canvas, rect, mattePaint, false);
       L.endSection("Layer#saveLayer");
       clearCanvas(canvas);
       //noinspection ConstantConditions
@@ -270,8 +282,6 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
         case MaskModeIntersect:
           // TODO
           return;
-        case MaskModeUnknown:
-          return;
         case MaskModeAdd:
         default:
           path.computeBounds(tempMaskBoundsRect, false);
@@ -320,30 +330,57 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
 
   abstract void drawLayer(Canvas canvas, Matrix parentMatrix, int parentAlpha);
 
-  @SuppressLint("WrongConstant") private void applyMasks(Canvas canvas, Matrix matrix) {
-    L.beginSection("Layer#drawMask");
-    L.beginSection("Layer#saveLayer");
-    canvas.saveLayer(rect, maskPaint, SAVE_FLAGS);
-    L.endSection("Layer#saveLayer");
-    clearCanvas(canvas);
+  private void applyMasks(Canvas canvas, Matrix matrix) {
+    applyMasks(canvas, matrix, Mask.MaskMode.MaskModeAdd);
+    // Treat intersect masks like add masks. This is not correct but it's closer.
+    applyMasks(canvas, matrix, Mask.MaskMode.MaskModeIntersect);
+    applyMasks(canvas, matrix, Mask.MaskMode.MaskModeSubtract);
+  }
+
+  private void applyMasks(Canvas canvas, Matrix matrix,
+      Mask.MaskMode maskMode) {
+    Paint paint;
+    switch (maskMode) {
+      case MaskModeSubtract:
+        paint = subtractMaskPaint;
+        break;
+      case MaskModeIntersect:
+      case MaskModeAdd:
+      default:
+        // As a hack, we treat all non-subtract masks like add masks. This is not correct but it's
+        // better than nothing.
+        paint = addMaskPaint;
+    }
 
     //noinspection ConstantConditions
     int size = mask.getMasks().size();
+
+    boolean hasMask = false;
+    for (int i = 0; i < size; i++) {
+      if (mask.getMasks().get(i).getMaskMode() == maskMode) {
+        hasMask = true;
+        break;
+      }
+    }
+    if (!hasMask) {
+      return;
+    }
+
+    L.beginSection("Layer#drawMask");
+    L.beginSection("Layer#saveLayer");
+    saveLayerCompat(canvas, rect, paint, false);
+    L.endSection("Layer#saveLayer");
+    clearCanvas(canvas);
+
     for (int i = 0; i < size; i++) {
       Mask mask = this.mask.getMasks().get(i);
+      if (mask.getMaskMode() != maskMode) {
+        continue;
+      }
       BaseKeyframeAnimation<?, Path> maskAnimation = this.mask.getMaskAnimations().get(i);
       Path maskPath = maskAnimation.getValue();
       path.set(maskPath);
       path.transform(matrix);
-
-      switch (mask.getMaskMode()) {
-        case MaskModeSubtract:
-          path.setFillType(Path.FillType.INVERSE_WINDING);
-          break;
-        case MaskModeAdd:
-        default:
-          path.setFillType(Path.FillType.WINDING);
-      }
       BaseKeyframeAnimation<Integer, Integer> opacityAnimation =
           this.mask.getOpacityAnimations().get(i);
       int alpha = contentPaint.getAlpha();
@@ -369,6 +406,13 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
   }
 
   void setProgress(@FloatRange(from = 0f, to = 1f) float progress) {
+    // Time stretch should not be applied to the layer transform.
+    transform.setProgress(progress);
+    if (mask != null) {
+      for (int i = 0; i < mask.getMaskAnimations().size(); i++) {
+        mask.getMaskAnimations().get(i).setProgress(progress);
+      }
+    }
     if (layerModel.getTimeStretch() != 0) {
       progress /= layerModel.getTimeStretch();
     }
@@ -407,12 +451,33 @@ public abstract class BaseLayer implements DrawingContent, BaseKeyframeAnimation
     // Do nothing
   }
 
-  public void setBlur(float blur) {
-    // Do nothing
+  @Override public void resolveKeyPath(
+      KeyPath keyPath, int depth, List<KeyPath> accumulator, KeyPath currentPartialKeyPath) {
+    if (!keyPath.matches(getName(), depth)) {
+      return;
+    }
+
+    if (!"__container".equals(getName())) {
+      currentPartialKeyPath = currentPartialKeyPath.addKey(getName());
+
+      if (keyPath.fullyResolvesTo(getName(), depth)) {
+        accumulator.add(currentPartialKeyPath.resolve(this));
+      }
+    }
+
+    if (keyPath.propagateToChildren(getName(), depth)) {
+      int newDepth = depth + keyPath.incrementDepthBy(getName(), depth);
+      resolveChildKeyPath(keyPath, newDepth, accumulator, currentPartialKeyPath);
+    }
   }
 
-  @Override public void addColorFilter(@Nullable String layerName, @Nullable String contentName,
-      @Nullable ColorFilter colorFilter) {
-    // Do nothing
+  void resolveChildKeyPath(
+      KeyPath keyPath, int depth, List<KeyPath> accumulator, KeyPath currentPartialKeyPath) {
+  }
+
+  @CallSuper
+  @Override
+  public <T> void addValueCallback(T property, @Nullable LottieValueCallback<T> callback) {
+    transform.applyValueCallback(property, callback);
   }
 }

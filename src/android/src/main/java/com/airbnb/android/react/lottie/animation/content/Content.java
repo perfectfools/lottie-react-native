@@ -1,4 +1,4 @@
-package com.airbnb.android.react.lottie.animation.content;
+package com.airbnb.lottie.animation.content;
 
 import java.util.List;
 

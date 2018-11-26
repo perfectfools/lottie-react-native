@@ -1,34 +1,44 @@
-package com.airbnb.android.react.lottie.animation.content;
+package com.airbnb.lottie.animation.content;
 
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
 import android.graphics.DashPathEffect;
 import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.RectF;
-import android.support.annotation.Nullable;
+import androidx.annotation.CallSuper;
+import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.L;
 import com.airbnb.android.react.lottie.LottieDrawable;
+import com.airbnb.android.react.lottie.LottieProperty;
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
+import com.airbnb.android.react.lottie.animation.keyframe.ValueCallbackKeyframeAnimation;
+import com.airbnb.android.react.lottie.model.KeyPath;
 import com.airbnb.android.react.lottie.model.animatable.AnimatableFloatValue;
 import com.airbnb.android.react.lottie.model.animatable.AnimatableIntegerValue;
 import com.airbnb.android.react.lottie.model.content.ShapeTrimPath;
 import com.airbnb.android.react.lottie.model.layer.BaseLayer;
+import com.airbnb.android.react.lottie.utils.MiscUtils;
 import com.airbnb.android.react.lottie.utils.Utils;
+import com.airbnb.android.react.lottie.value.LottieValueCallback;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class BaseStrokeContent implements DrawingContent,
-    BaseKeyframeAnimation.AnimationListener {
+import static com.airbnb.lottie.utils.MiscUtils.clamp;
+
+public abstract class BaseStrokeContent
+    implements BaseKeyframeAnimation.AnimationListener, KeyPathElementContent, DrawingContent {
 
   private final PathMeasure pm = new PathMeasure();
   private final Path path = new Path();
   private final Path trimPathPath = new Path();
   private final RectF rect = new RectF();
   private final LottieDrawable lottieDrawable;
+  private final BaseLayer layer;
   private final List<PathGroup> pathGroups = new ArrayList<>();
   private final float[] dashPatternValues;
   final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -37,15 +47,18 @@ public abstract class BaseStrokeContent implements DrawingContent,
   private final BaseKeyframeAnimation<?, Integer> opacityAnimation;
   private final List<BaseKeyframeAnimation<?, Float>> dashPatternAnimations;
   @Nullable private final BaseKeyframeAnimation<?, Float> dashPatternOffsetAnimation;
+  @Nullable private BaseKeyframeAnimation<ColorFilter, ColorFilter> colorFilterAnimation;
 
   BaseStrokeContent(final LottieDrawable lottieDrawable, BaseLayer layer, Paint.Cap cap,
-      Paint.Join join, AnimatableIntegerValue opacity, AnimatableFloatValue width,
+      Paint.Join join, float miterLimit, AnimatableIntegerValue opacity, AnimatableFloatValue width,
       List<AnimatableFloatValue> dashPattern, AnimatableFloatValue offset) {
     this.lottieDrawable = lottieDrawable;
+    this.layer = layer;
 
     paint.setStyle(Paint.Style.STROKE);
     paint.setStrokeCap(cap);
     paint.setStrokeJoin(join);
+    paint.setStrokeMiter(miterLimit);
 
     opacityAnimation = opacity.createAnimation();
     widthAnimation = width.createAnimation();
@@ -124,7 +137,7 @@ public abstract class BaseStrokeContent implements DrawingContent,
   @Override public void draw(Canvas canvas, Matrix parentMatrix, int parentAlpha) {
     L.beginSection("StrokeContent#draw");
     int alpha = (int) ((parentAlpha / 255f * opacityAnimation.getValue() / 100f) * 255);
-    paint.setAlpha(alpha);
+    paint.setAlpha(clamp(alpha, 0, 255));
     paint.setStrokeWidth(widthAnimation.getValue() * Utils.getScale(parentMatrix));
     if (paint.getStrokeWidth() <= 0) {
       // Android draws a hairline stroke for 0, After Effects doesn't.
@@ -132,6 +145,10 @@ public abstract class BaseStrokeContent implements DrawingContent,
       return;
     }
     applyDashPatternIfNeeded(parentMatrix);
+
+    if (colorFilterAnimation != null) {
+      paint.setColorFilter(colorFilterAnimation.getValue());
+    }
 
     for (int i = 0; i < pathGroups.size(); i++) {
       PathGroup pathGroup = pathGroups.get(i);
@@ -274,6 +291,31 @@ public abstract class BaseStrokeContent implements DrawingContent,
     float offset = dashPatternOffsetAnimation == null ? 0f : dashPatternOffsetAnimation.getValue();
     paint.setPathEffect(new DashPathEffect(dashPatternValues, offset));
     L.endSection("StrokeContent#applyDashPattern");
+  }
+
+  @Override public void resolveKeyPath(
+      KeyPath keyPath, int depth, List<KeyPath> accumulator, KeyPath currentPartialKeyPath) {
+    MiscUtils.resolveKeyPath(keyPath, depth, accumulator, currentPartialKeyPath, this);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  @CallSuper
+  public <T> void addValueCallback(T property, @Nullable LottieValueCallback<T> callback) {
+    if (property == LottieProperty.OPACITY) {
+      opacityAnimation.setValueCallback((LottieValueCallback<Integer>) callback);
+    } else if (property == LottieProperty.STROKE_WIDTH) {
+      widthAnimation.setValueCallback((LottieValueCallback<Float>) callback);
+    } else if (property == LottieProperty.COLOR_FILTER) {
+      if (callback == null) {
+        colorFilterAnimation = null;
+      } else {
+        colorFilterAnimation =
+            new ValueCallbackKeyframeAnimation<>((LottieValueCallback<ColorFilter>) callback);
+        colorFilterAnimation.addUpdateListener(this);
+        layer.addAnimation(colorFilterAnimation);
+      }
+    }
   }
 
   /**

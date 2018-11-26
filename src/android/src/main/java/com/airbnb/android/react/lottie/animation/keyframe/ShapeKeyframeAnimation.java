@@ -1,8 +1,8 @@
-package com.airbnb.android.react.lottie.animation.keyframe;
+package com.airbnb.lottie.animation.keyframe;
 
 import android.graphics.Path;
 
-import com.airbnb.android.react.lottie.animation.Keyframe;
+import com.airbnb.android.react.lottie.value.Keyframe;
 import com.airbnb.android.react.lottie.model.content.ShapeData;
 import com.airbnb.android.react.lottie.utils.MiscUtils;
 

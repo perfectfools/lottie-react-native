@@ -1,7 +1,7 @@
-package com.airbnb.android.react.lottie.animation.keyframe;
+package com.airbnb.lottie.animation.keyframe;
 
-import com.airbnb.android.react.lottie.animation.Keyframe;
 import com.airbnb.android.react.lottie.utils.GammaEvaluator;
+import com.airbnb.android.react.lottie.value.Keyframe;
 
 import java.util.List;
 
@@ -17,6 +17,15 @@ public class ColorKeyframeAnimation extends KeyframeAnimation<Integer> {
     }
     int startColor = keyframe.startValue;
     int endColor = keyframe.endValue;
+
+    if (valueCallback != null) {
+      //noinspection ConstantConditions
+      Integer value = valueCallback.getValueInternal(keyframe.startFrame, keyframe.endFrame, startColor,
+              endColor, keyframeProgress, getLinearCurrentKeyframeProgress(), getProgress());
+      if (value != null) {
+        return value;
+      }
+    }
 
     return GammaEvaluator.evaluate(keyframeProgress, startColor, endColor);
   }

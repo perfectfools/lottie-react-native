@@ -1,29 +1,26 @@
-package com.airbnb.android.react.lottie.utils;
+package com.airbnb.lottie.utils;
 
-import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Matrix;
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.PointF;
-import android.os.Build;
-import android.provider.Settings;
-import android.support.annotation.Nullable;
-import android.util.DisplayMetrics;
-import android.view.WindowManager;
+import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.L;
-import com.airbnb.android.react.lottie.LottieComposition;
 import com.airbnb.android.react.lottie.animation.content.TrimPathContent;
 
 import java.io.Closeable;
 
 public final class Utils {
+  public static final int SECOND_IN_NANOS = 1000000000;
+
   private static final PathMeasure pathMeasure = new PathMeasure();
   private static final Path tempPath = new Path();
   private static final Path tempPath2 = new Path();
-  private static DisplayMetrics displayMetrics;
   private static final float[] points = new float[4];
   private static final float SQRT_2 = (float) Math.sqrt(2);
+  private static float dpScale = -1;
 
   private Utils() {}
 
@@ -51,24 +48,6 @@ public final class Utils {
       } catch (Exception ignored) {
       }
     }
-  }
-
-  public static int getScreenWidth(Context context) {
-    if (displayMetrics == null) {
-      displayMetrics = new DisplayMetrics();
-    }
-    WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-    wm.getDefaultDisplay().getMetrics(displayMetrics);
-    return displayMetrics.widthPixels;
-  }
-
-  public static int getScreenHeight(Context context) {
-    if (displayMetrics == null) {
-      displayMetrics = new DisplayMetrics();
-    }
-    WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
-    wm.getDefaultDisplay().getMetrics(displayMetrics);
-    return displayMetrics.heightPixels;
   }
 
   public static float getScale(Matrix matrix) {
@@ -169,21 +148,21 @@ public final class Utils {
   }
 
   @SuppressWarnings("SameParameterValue")
-  public static boolean isAtLeastVersion(LottieComposition composition, int major, int minor, int
-      patch) {
-    if (composition.getMajorVersion() < major) {
+  public static boolean isAtLeastVersion(int major, int minor, int patch, int minMajor, int minMinor, int
+      minPatch) {
+    if (major < minMajor) {
       return false;
-    } else if (composition.getMajorVersion() > major) {
+    } else if (major > minMajor) {
       return true;
     }
 
-    if (composition.getMinorVersion() < minor) {
+    if (minor < minMinor) {
       return false;
-    } else if (composition.getMinorVersion() > minor) {
+    } else if (minor > minMinor) {
       return true;
     }
 
-    return composition.getPatchVersion() >= patch;
+    return patch >= minPatch;
   }
 
   public static int hashFor(float a, float b, float c, float d) {
@@ -203,14 +182,10 @@ public final class Utils {
     return result;
   }
 
-  public static float getAnimationScale(Context context) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-      return Settings.Global.getFloat(context.getContentResolver(),
-          Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f);
-    } else {
-      //noinspection deprecation
-      return Settings.System.getFloat(context.getContentResolver(),
-          Settings.System.ANIMATOR_DURATION_SCALE, 1.0f);
+  public static float dpScale() {
+    if (dpScale == -1) {
+      dpScale = Resources.getSystem().getDisplayMetrics().density;
     }
+    return dpScale;
   }
 }

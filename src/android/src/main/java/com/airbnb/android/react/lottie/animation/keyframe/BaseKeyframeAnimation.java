@@ -1,10 +1,10 @@
-package com.airbnb.android.react.lottie.animation.keyframe;
+package com.airbnb.lottie.animation.keyframe;
 
-import android.support.annotation.FloatRange;
-import android.support.annotation.Nullable;
-import android.util.Log;
+import androidx.annotation.FloatRange;
+import androidx.annotation.Nullable;
 
-import com.airbnb.android.react.lottie.animation.Keyframe;
+import com.airbnb.android.react.lottie.value.LottieValueCallback;
+import com.airbnb.android.react.lottie.value.Keyframe;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,7 +24,7 @@ public abstract class BaseKeyframeAnimation<K, A> {
 
   private final List<? extends Keyframe<K>> keyframes;
   private float progress = 0f;
-  private float blur = 0;
+  @Nullable protected LottieValueCallback<A> valueCallback;
 
   @Nullable private Keyframe<K> cachedKeyframe;
 
@@ -40,18 +40,11 @@ public abstract class BaseKeyframeAnimation<K, A> {
     listeners.add(listener);
   }
 
-  public void setBlur(float blur) {
-      this.blur = blur;
-
-      /*for (int i = 0; i < listeners.size(); i++) {
-        listeners.get(i).onValueChanged();
-      }*/
-  }
   public void setProgress(@FloatRange(from = 0f, to = 1f) float progress) {
     if (progress < getStartDelayProgress()) {
-      progress = 0f;
+      progress = getStartDelayProgress();
     } else if (progress > getEndProgress()) {
-      progress = 1f;
+      progress = getEndProgress();
     }
 
     if (progress == this.progress) {
@@ -59,16 +52,16 @@ public abstract class BaseKeyframeAnimation<K, A> {
     }
     this.progress = progress;
 
+    notifyListeners();
+  }
+
+  public void notifyListeners() {
     for (int i = 0; i < listeners.size(); i++) {
       listeners.get(i).onValueChanged();
     }
   }
 
   private Keyframe<K> getCurrentKeyframe() {
-    if (keyframes.isEmpty()) {
-      throw new IllegalStateException("There are no keyframes");
-    }
-
     if (cachedKeyframe != null && cachedKeyframe.containsProgress(progress)) {
       return cachedKeyframe;
     }
@@ -88,10 +81,10 @@ public abstract class BaseKeyframeAnimation<K, A> {
   }
 
   /**
-   * This wil be [0, 1] unless the interpolator has overshoot in which case getValue() should be
-   * able to handle values outside of that range.
+   * Returns the progress into the current keyframe between 0 and 1. This does not take into account
+   * any interpolation that the keyframe may have.
    */
-  private float getCurrentKeyframeProgress() {
+  float getLinearCurrentKeyframeProgress() {
     if (isDiscrete) {
       return 0f;
     }
@@ -102,8 +95,20 @@ public abstract class BaseKeyframeAnimation<K, A> {
     }
     float progressIntoFrame = progress - keyframe.getStartProgress();
     float keyframeProgress = keyframe.getEndProgress() - keyframe.getStartProgress();
+    return progressIntoFrame / keyframeProgress;
+  }
+
+  /**
+   * Takes the value of {@link #getLinearCurrentKeyframeProgress()} and interpolates it with
+   * the current keyframe's interpolator.
+   */
+  private float getInterpolatedCurrentKeyframeProgress() {
+    Keyframe<K> keyframe = getCurrentKeyframe();
+    if (keyframe.isStatic()) {
+      return 0f;
+    }
     //noinspection ConstantConditions
-    return keyframe.interpolator.getInterpolation(progressIntoFrame / keyframeProgress);
+    return keyframe.interpolator.getInterpolation(getLinearCurrentKeyframeProgress());
   }
 
   @FloatRange(from = 0f, to = 1f)
@@ -112,16 +117,26 @@ public abstract class BaseKeyframeAnimation<K, A> {
   }
 
   @FloatRange(from = 0f, to = 1f)
-  private float getEndProgress() {
+  float getEndProgress() {
     return keyframes.isEmpty() ? 1f : keyframes.get(keyframes.size() - 1).getEndProgress();
   }
 
   public A getValue() {
-    return getValue(getCurrentKeyframe(), getCurrentKeyframeProgress());
+    return getValue(getCurrentKeyframe(), getInterpolatedCurrentKeyframeProgress());
   }
 
   public float getProgress() {
     return progress;
+  }
+
+  public void setValueCallback(@Nullable LottieValueCallback<A> valueCallback) {
+    if (this.valueCallback != null) {
+      this.valueCallback.setAnimation(null);
+    }
+    this.valueCallback = valueCallback;
+    if (valueCallback != null) {
+      valueCallback.setAnimation(this);
+    }
   }
 
   /**

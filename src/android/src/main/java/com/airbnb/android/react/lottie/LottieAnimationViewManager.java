@@ -7,7 +7,7 @@ import android.widget.ImageView;
 import android.view.View.OnAttachStateChangeListener;
 import android.view.View;
 
-import com.airbnb.lottie.LottieAnimationView;
+import com.airbnb.android.react.lottie.LottieAnimationView;
 import com.facebook.react.bridge.ReadableArray;
 import com.facebook.react.common.MapBuilder;
 import com.facebook.react.uimanager.SimpleViewManager;

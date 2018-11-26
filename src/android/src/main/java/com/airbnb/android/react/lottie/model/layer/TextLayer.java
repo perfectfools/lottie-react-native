@@ -1,4 +1,4 @@
-package com.airbnb.android.react.lottie.model.layer;
+package com.airbnb.lottie.model.layer;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -7,10 +7,11 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.LottieComposition;
 import com.airbnb.android.react.lottie.LottieDrawable;
+import com.airbnb.android.react.lottie.LottieProperty;
 import com.airbnb.android.react.lottie.TextDelegate;
 import com.airbnb.android.react.lottie.animation.content.ContentGroup;
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
@@ -21,6 +22,7 @@ import com.airbnb.android.react.lottie.model.FontCharacter;
 import com.airbnb.android.react.lottie.model.animatable.AnimatableTextProperties;
 import com.airbnb.android.react.lottie.model.content.ShapeGroup;
 import com.airbnb.android.react.lottie.utils.Utils;
+import com.airbnb.android.react.lottie.value.LottieValueCallback;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,7 +44,7 @@ public class TextLayer extends BaseLayer {
   private final LottieDrawable lottieDrawable;
   private final LottieComposition composition;
   @Nullable private BaseKeyframeAnimation<Integer, Integer> colorAnimation;
-  @Nullable private BaseKeyframeAnimation<Integer, Integer> strokeAnimation;
+  @Nullable private BaseKeyframeAnimation<Integer, Integer> strokeColorAnimation;
   @Nullable private BaseKeyframeAnimation<Float, Float> strokeWidthAnimation;
   @Nullable private BaseKeyframeAnimation<Float, Float> trackingAnimation;
 
@@ -64,9 +66,9 @@ public class TextLayer extends BaseLayer {
 
 
     if (textProperties != null && textProperties.stroke != null) {
-      strokeAnimation = textProperties.stroke.createAnimation();
-      strokeAnimation.addUpdateListener(this);
-      addAnimation(strokeAnimation);
+      strokeColorAnimation = textProperties.stroke.createAnimation();
+      strokeColorAnimation.addUpdateListener(this);
+      addAnimation(strokeColorAnimation);
     }
 
     if (textProperties != null && textProperties.strokeWidth != null) {
@@ -101,8 +103,8 @@ public class TextLayer extends BaseLayer {
       fillPaint.setColor(documentData.color);
     }
 
-    if (strokeAnimation != null) {
-      strokePaint.setColor(strokeAnimation.getValue());
+    if (strokeColorAnimation != null) {
+      strokePaint.setColor(strokeColorAnimation.getValue());
     } else {
       strokePaint.setColor(documentData.strokeColor);
     }
@@ -114,7 +116,7 @@ public class TextLayer extends BaseLayer {
       strokePaint.setStrokeWidth(strokeWidthAnimation.getValue());
     } else {
       float parentScale = Utils.getScale(parentMatrix);
-      strokePaint.setStrokeWidth(documentData.strokeWidth * composition.getDpScale() * parentScale);
+      strokePaint.setStrokeWidth((float) (documentData.strokeWidth * Utils.dpScale() * parentScale));
     }
 
     if (lottieDrawable.useTextGlyphs()) {
@@ -142,7 +144,7 @@ public class TextLayer extends BaseLayer {
         continue;
       }
       drawCharacterAsGlyph(character, parentMatrix, fontScale, documentData, canvas);
-      float tx = (float) character.getWidth() * fontScale * composition.getDpScale() * parentScale;
+      float tx = (float) character.getWidth() * fontScale * Utils.dpScale() * parentScale;
       // Add tracking
       float tracking = documentData.tracking / 10f;
       if (trackingAnimation != null) {
@@ -166,7 +168,7 @@ public class TextLayer extends BaseLayer {
       text = textDelegate.getTextInternal(text);
     }
     fillPaint.setTypeface(typeface);
-    fillPaint.setTextSize(documentData.size * composition.getDpScale());
+    fillPaint.setTextSize((float) (documentData.size * Utils.dpScale()));
     strokePaint.setTypeface(fillPaint.getTypeface());
     strokePaint.setTextSize(fillPaint.getTextSize());
     for (int i = 0; i < text.length(); i++) {
@@ -195,6 +197,7 @@ public class TextLayer extends BaseLayer {
       Path path = contentGroups.get(j).getPath();
       path.computeBounds(rectF, false);
       matrix.set(parentMatrix);
+      matrix.preTranslate(0, (float) -documentData.baselineShift * Utils.dpScale());
       matrix.preScale(fontScale, fontScale);
       path.transform(matrix);
       if (documentData.strokeOverFill) {
@@ -251,5 +254,20 @@ public class TextLayer extends BaseLayer {
     }
     contentsForCharacter.put(character, contents);
     return contents;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> void addValueCallback(T property, @Nullable LottieValueCallback<T> callback) {
+    super.addValueCallback(property, callback);
+    if (property == LottieProperty.COLOR && colorAnimation != null) {
+      colorAnimation.setValueCallback((LottieValueCallback<Integer>) callback);
+    } else if (property == LottieProperty.STROKE_COLOR && strokeColorAnimation != null) {
+      strokeColorAnimation.setValueCallback((LottieValueCallback<Integer>) callback);
+    } else if (property == LottieProperty.STROKE_WIDTH && strokeWidthAnimation != null) {
+      strokeWidthAnimation.setValueCallback((LottieValueCallback<Float>) callback);
+    } else if (property == LottieProperty.TEXT_TRACKING && trackingAnimation != null) {
+      trackingAnimation.setValueCallback((LottieValueCallback<Float>) callback);
+    }
   }
 }

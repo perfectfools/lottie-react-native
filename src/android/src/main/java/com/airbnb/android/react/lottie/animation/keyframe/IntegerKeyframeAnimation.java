@@ -1,6 +1,6 @@
-package com.airbnb.android.react.lottie.animation.keyframe;
+package com.airbnb.lottie.animation.keyframe;
 
-import com.airbnb.android.react.lottie.animation.Keyframe;
+import com.airbnb.android.react.lottie.value.Keyframe;
 import com.airbnb.android.react.lottie.utils.MiscUtils;
 
 import java.util.List;
@@ -15,6 +15,17 @@ public class IntegerKeyframeAnimation extends KeyframeAnimation<Integer> {
     if (keyframe.startValue == null || keyframe.endValue == null) {
       throw new IllegalStateException("Missing values for keyframe.");
     }
+
+    if (valueCallback != null) {
+      //noinspection ConstantConditions
+      Integer value = valueCallback.getValueInternal(keyframe.startFrame, keyframe.endFrame,
+              keyframe.startValue, keyframe.endValue,
+              keyframeProgress, getLinearCurrentKeyframeProgress(), getProgress());
+      if (value != null) {
+        return value;
+      }
+    }
+
     return MiscUtils.lerp(keyframe.startValue, keyframe.endValue, keyframeProgress);
   }
 }

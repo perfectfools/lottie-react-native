@@ -1,13 +1,10 @@
-package com.airbnb.android.react.lottie.model.content;
+package com.airbnb.lottie.model.content;
 
-import com.airbnb.android.react.lottie.LottieComposition;
 import com.airbnb.android.react.lottie.LottieDrawable;
 import com.airbnb.android.react.lottie.animation.content.Content;
 import com.airbnb.android.react.lottie.animation.content.TrimPathContent;
 import com.airbnb.android.react.lottie.model.animatable.AnimatableFloatValue;
 import com.airbnb.android.react.lottie.model.layer.BaseLayer;
-
-import org.json.JSONObject;
 
 public class ShapeTrimPath implements ContentModel {
 
@@ -15,7 +12,7 @@ public class ShapeTrimPath implements ContentModel {
     Simultaneously,
     Individually;
 
-    static Type forId(int id) {
+    public static Type forId(int id) {
       switch (id) {
         case 1:
           return Simultaneously;
@@ -33,7 +30,7 @@ public class ShapeTrimPath implements ContentModel {
   private final AnimatableFloatValue end;
   private final AnimatableFloatValue offset;
 
-  private ShapeTrimPath(String name, Type type, AnimatableFloatValue start,
+  public ShapeTrimPath(String name, Type type, AnimatableFloatValue start,
       AnimatableFloatValue end, AnimatableFloatValue offset) {
     this.name = name;
     this.type = type;
@@ -68,19 +65,5 @@ public class ShapeTrimPath implements ContentModel {
 
   @Override public String toString() {
     return "Trim Path: {start: " + start + ", end: " + end + ", offset: " + offset + "}";
-  }
-
-  static class Factory {
-    private Factory() {
-    }
-
-    static ShapeTrimPath newInstance(JSONObject json, LottieComposition composition) {
-      return new ShapeTrimPath(
-          json.optString("nm"),
-          Type.forId(json.optInt("m", 1)),
-          AnimatableFloatValue.Factory.newInstance(json.optJSONObject("s"), composition, false),
-          AnimatableFloatValue.Factory.newInstance(json.optJSONObject("e"), composition, false),
-          AnimatableFloatValue.Factory.newInstance(json.optJSONObject("o"), composition, false));
-    }
   }
 }

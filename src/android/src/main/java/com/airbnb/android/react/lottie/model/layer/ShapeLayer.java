@@ -1,19 +1,18 @@
-package com.airbnb.android.react.lottie.model.layer;
+package com.airbnb.lottie.model.layer;
 
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.RectF;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.util.Log;
+import androidx.annotation.NonNull;
 
 import com.airbnb.android.react.lottie.LottieDrawable;
 import com.airbnb.android.react.lottie.animation.content.Content;
 import com.airbnb.android.react.lottie.animation.content.ContentGroup;
+import com.airbnb.android.react.lottie.model.KeyPath;
 import com.airbnb.android.react.lottie.model.content.ShapeGroup;
 
 import java.util.Collections;
+import java.util.List;
 
 public class ShapeLayer extends BaseLayer {
   private final ContentGroup contentGroup;
@@ -21,7 +20,8 @@ public class ShapeLayer extends BaseLayer {
   ShapeLayer(LottieDrawable lottieDrawable, Layer layerModel) {
     super(lottieDrawable, layerModel);
 
-    ShapeGroup shapeGroup = new ShapeGroup(layerModel.getName(), layerModel.getShapes());
+    // Naming this __container allows it to be ignored in KeyPath matching.
+    ShapeGroup shapeGroup = new ShapeGroup("__container", layerModel.getShapes());
     contentGroup = new ContentGroup(lottieDrawable, this, shapeGroup);
     contentGroup.setContents(Collections.<Content>emptyList(), Collections.<Content>emptyList());
   }
@@ -29,17 +29,15 @@ public class ShapeLayer extends BaseLayer {
   @Override void drawLayer(@NonNull Canvas canvas, Matrix parentMatrix, int parentAlpha) {
     contentGroup.draw(canvas, parentMatrix, parentAlpha);
   }
-  @Override public void setBlur(float blur) {
-    // Do nothing
-    contentGroup.setBlur(blur);
-  }
+
   @Override public void getBounds(RectF outBounds, Matrix parentMatrix) {
     super.getBounds(outBounds, parentMatrix);
     contentGroup.getBounds(outBounds, boundsMatrix);
   }
 
-  @Override public void addColorFilter(@Nullable String layerName, @Nullable String contentName,
-      @Nullable ColorFilter colorFilter) {
-    contentGroup.addColorFilter(layerName, contentName, colorFilter);
+  @Override
+  protected void resolveChildKeyPath(KeyPath keyPath, int depth, List<KeyPath> accumulator,
+      KeyPath currentPartialKeyPath) {
+    contentGroup.resolveKeyPath(keyPath, depth, accumulator, currentPartialKeyPath);
   }
 }

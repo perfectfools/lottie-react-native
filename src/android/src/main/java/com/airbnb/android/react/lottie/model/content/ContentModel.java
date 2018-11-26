@@ -1,7 +1,7 @@
-package com.airbnb.android.react.lottie.model.content;
+package com.airbnb.lottie.model.content;
 
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.LottieDrawable;
 import com.airbnb.android.react.lottie.animation.content.Content;

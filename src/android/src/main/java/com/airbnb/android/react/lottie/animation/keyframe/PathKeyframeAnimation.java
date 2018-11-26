@@ -1,10 +1,10 @@
-package com.airbnb.android.react.lottie.animation.keyframe;
+package com.airbnb.lottie.animation.keyframe;
 
 import android.graphics.Path;
 import android.graphics.PathMeasure;
 import android.graphics.PointF;
 
-import com.airbnb.android.react.lottie.animation.Keyframe;
+import com.airbnb.android.react.lottie.value.Keyframe;
 
 import java.util.List;
 
@@ -23,6 +23,15 @@ public class PathKeyframeAnimation extends KeyframeAnimation<PointF> {
     Path path = pathKeyframe.getPath();
     if (path == null) {
       return keyframe.startValue;
+    }
+
+    if (valueCallback != null) {
+      PointF value = valueCallback.getValueInternal(pathKeyframe.startFrame, pathKeyframe.endFrame,
+              pathKeyframe.startValue, pathKeyframe.endValue, getLinearCurrentKeyframeProgress(),
+              keyframeProgress, getProgress());
+      if (value != null) {
+        return value;
+      }
     }
 
     if (pathMeasureKeyframe != pathKeyframe) {

@@ -1,7 +1,7 @@
-package com.airbnb.android.react.lottie.animation.keyframe;
+package com.airbnb.lottie.animation.keyframe;
 
-import com.airbnb.android.react.lottie.animation.Keyframe;
-import com.airbnb.android.react.lottie.model.ScaleXY;
+import com.airbnb.android.react.lottie.value.Keyframe;
+import com.airbnb.android.react.lottie.value.ScaleXY;
 import com.airbnb.android.react.lottie.utils.MiscUtils;
 
 import java.util.List;
@@ -17,6 +17,17 @@ public class ScaleKeyframeAnimation extends KeyframeAnimation<ScaleXY> {
     }
     ScaleXY startTransform = keyframe.startValue;
     ScaleXY endTransform = keyframe.endValue;
+
+    if (valueCallback != null) {
+      //noinspection ConstantConditions
+      ScaleXY value = valueCallback.getValueInternal(keyframe.startFrame, keyframe.endFrame,
+              startTransform, endTransform,
+              keyframeProgress, getLinearCurrentKeyframeProgress(), getProgress());
+      if (value != null) {
+        return value;
+      }
+    }
+
     return new ScaleXY(
         MiscUtils.lerp(startTransform.getScaleX(), endTransform.getScaleX(), keyframeProgress),
         MiscUtils.lerp(startTransform.getScaleY(), endTransform.getScaleY(), keyframeProgress));

@@ -1,15 +1,12 @@
-package com.airbnb.android.react.lottie.model.content;
+package com.airbnb.lottie.model.content;
 
-import android.support.annotation.Nullable;
-import android.util.Log;
+import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.L;
 import com.airbnb.android.react.lottie.LottieDrawable;
 import com.airbnb.android.react.lottie.animation.content.Content;
 import com.airbnb.android.react.lottie.animation.content.MergePathsContent;
 import com.airbnb.android.react.lottie.model.layer.BaseLayer;
-
-import org.json.JSONObject;
 
 
 public class MergePaths implements ContentModel {
@@ -21,7 +18,7 @@ public class MergePaths implements ContentModel {
     Intersect,
     ExcludeIntersections;
 
-    private static MergePathsMode forId(int id) {
+    public static MergePathsMode forId(int id) {
       switch (id) {
         case 1:
           return Merge;
@@ -42,7 +39,7 @@ public class MergePaths implements ContentModel {
   private final String name;
   private final MergePathsMode mode;
 
-  private MergePaths(String name, MergePathsMode mode) {
+  public MergePaths(String name, MergePathsMode mode) {
     this.name = name;
     this.mode = mode;
   }
@@ -57,7 +54,7 @@ public class MergePaths implements ContentModel {
 
   @Override @Nullable public Content toContent(LottieDrawable drawable, BaseLayer layer) {
     if (!drawable.enableMergePathsForKitKatAndAbove()) {
-      Log.w(L.TAG, "Animation contains merge paths but they are disabled.");
+      L.warn("Animation contains merge paths but they are disabled.");
       return null;
     }
     return new MergePathsContent(this);
@@ -66,14 +63,5 @@ public class MergePaths implements ContentModel {
   @Override
   public String toString() {
     return "MergePaths{" + "mode=" +  mode + '}';
-  }
-
-  static class Factory {
-    private Factory() {
-    }
-
-    static MergePaths newInstance(JSONObject json) {
-      return new MergePaths(json.optString("nm"), MergePathsMode.forId(json.optInt("mm", 1)));
-    }
   }
 }

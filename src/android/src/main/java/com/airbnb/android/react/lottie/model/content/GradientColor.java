@@ -1,4 +1,4 @@
-package com.airbnb.android.react.lottie.model.content;
+package com.airbnb.lottie.model.content;
 
 import com.airbnb.android.react.lottie.utils.GammaEvaluator;
 import com.airbnb.android.react.lottie.utils.MiscUtils;

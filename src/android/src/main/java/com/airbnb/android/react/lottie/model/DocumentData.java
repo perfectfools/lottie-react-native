@@ -1,85 +1,40 @@
-package com.airbnb.android.react.lottie.model;
+package com.airbnb.lottie.model;
 
-import android.graphics.Color;
-import android.support.annotation.ColorInt;
+import androidx.annotation.ColorInt;
+import androidx.annotation.RestrictTo;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+import static androidx.annotation.RestrictTo.Scope.LIBRARY;
 
+@RestrictTo(LIBRARY)
 public class DocumentData {
 
-  public String text;
-  @SuppressWarnings("WeakerAccess") public String fontName;
-  public int size;
-  @SuppressWarnings("WeakerAccess") int justification;
-  public int tracking;
-  @SuppressWarnings("WeakerAccess") double lineHeight;
-  @ColorInt public int color;
-  @ColorInt public int strokeColor;
-  public int strokeWidth;
-  public boolean strokeOverFill;
+  public final String text;
+  @SuppressWarnings("WeakerAccess") public final String fontName;
+  public final double size;
+  @SuppressWarnings("WeakerAccess") final int justification;
+  public final int tracking;
+  @SuppressWarnings("WeakerAccess") final double lineHeight;
+  public final double baselineShift;
+  @ColorInt public final int color;
+  @ColorInt public final int strokeColor;
+  public final double strokeWidth;
+  public final boolean strokeOverFill;
 
 
-  DocumentData(String text, String fontName, int size, int justification, int tracking,
-      double lineHeight, @ColorInt int color, @ColorInt int strokeColor, int strokeWidth,
-      boolean strokeOverFill) {
+  public DocumentData(String text, String fontName, double size, int justification, int tracking,
+      double lineHeight, double baselineShift, @ColorInt int color, @ColorInt int strokeColor,
+      double strokeWidth, boolean strokeOverFill) {
     this.text = text;
     this.fontName = fontName;
     this.size = size;
     this.justification = justification;
     this.tracking = tracking;
     this.lineHeight = lineHeight;
+    this.baselineShift = baselineShift;
     this.color = color;
     this.strokeColor = strokeColor;
     this.strokeWidth = strokeWidth;
     this.strokeOverFill = strokeOverFill;
-  }
-
-  void set(DocumentData documentData) {
-    text = documentData.text;
-    fontName = documentData.fontName;
-    size = documentData.size;
-    justification = documentData.justification;
-    tracking = documentData.tracking;
-    lineHeight = documentData.lineHeight;
-    color = documentData.color;
-  }
-
-
-  public static final class Factory {
-
-    private Factory() {
-    }
-
-    public static DocumentData newInstance(JSONObject json) {
-      String text = json.optString("t");
-      String fontName = json.optString("f");
-      int size = json.optInt("s");
-      int justification = json.optInt("j");
-      int tracking = json.optInt("tr");
-      double lineHeight = json.optDouble("lh");
-      JSONArray colorArray = json.optJSONArray("fc");
-      int color = Color.argb(
-          255,
-          (int) (colorArray.optDouble(0) * 255),
-          (int) (colorArray.optDouble(1) * 255),
-          (int) (colorArray.optDouble(2) * 255));
-      JSONArray strokeArray = json.optJSONArray("sc");
-      int strokeColor = 0;
-      if (strokeArray != null) {
-        strokeColor = Color.argb(
-            255,
-            (int) (strokeArray.optDouble(0) * 255),
-            (int) (strokeArray.optDouble(1) * 255),
-            (int) (strokeArray.optDouble(2) * 255));
-      }
-
-      int strokeWidth = json.optInt("sw");
-      boolean strokeOverFill = json.optBoolean("of");
-
-      return new DocumentData(text, fontName, size, justification, tracking, lineHeight, color,
-          strokeColor, strokeWidth, strokeOverFill);
-    }
   }
 
   @Override public int hashCode() {
@@ -87,7 +42,7 @@ public class DocumentData {
     long temp;
     result = text.hashCode();
     result = 31 * result + fontName.hashCode();
-    result = 31 * result + size;
+    result = (int) (31 * result + size);
     result = 31 * result + justification;
     result = 31 * result + tracking;
     temp = Double.doubleToLongBits(lineHeight);

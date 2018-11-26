@@ -1,25 +1,27 @@
-package com.airbnb.android.react.lottie.model.layer;
+package com.airbnb.lottie.model.layer;
 
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.Matrix;
 import android.graphics.RectF;
-import android.support.annotation.FloatRange;
-import android.support.annotation.Nullable;
-import android.support.v4.util.LongSparseArray;
-import android.util.Log;
+import androidx.annotation.FloatRange;
+import androidx.annotation.Nullable;
+import androidx.collection.LongSparseArray;
 
 import com.airbnb.android.react.lottie.L;
 import com.airbnb.android.react.lottie.LottieComposition;
 import com.airbnb.android.react.lottie.LottieDrawable;
+import com.airbnb.android.react.lottie.LottieProperty;
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
+import com.airbnb.android.react.lottie.animation.keyframe.ValueCallbackKeyframeAnimation;
+import com.airbnb.android.react.lottie.model.KeyPath;
 import com.airbnb.android.react.lottie.model.animatable.AnimatableFloatValue;
+import com.airbnb.android.react.lottie.value.LottieValueCallback;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class CompositionLayer extends BaseLayer {
-  @Nullable private final BaseKeyframeAnimation<Float, Float> timeRemapping;
+  @Nullable private BaseKeyframeAnimation<Float, Float> timeRemapping;
   private final List<BaseLayer> layers = new ArrayList<>();
   private final RectF rect = new RectF();
   private final RectF newClipRect = new RectF();
@@ -35,6 +37,7 @@ public class CompositionLayer extends BaseLayer {
     if (timeRemapping != null) {
       this.timeRemapping = timeRemapping.createAnimation();
       addAnimation(this.timeRemapping);
+      //noinspection ConstantConditions
       this.timeRemapping.addUpdateListener(this);
     } else {
       this.timeRemapping = null;
@@ -68,6 +71,12 @@ public class CompositionLayer extends BaseLayer {
     for (int i = 0; i < layerMap.size(); i++) {
       long key = layerMap.keyAt(i);
       BaseLayer layerView = layerMap.get(key);
+      // This shouldn't happen but it appears as if sometimes on pre-lollipop devices when
+      // compiled with d8, layerView is null sometimes.
+      // https://github.com/airbnb/lottie-android/issues/524
+      if (layerView == null) {
+        continue;
+      }
       BaseLayer parentLayer = layerMap.get(layerView.getLayerModel().getParentId());
       if (parentLayer != null) {
         layerView.setParentLayer(parentLayer);
@@ -113,17 +122,13 @@ public class CompositionLayer extends BaseLayer {
       }
     }
   }
-  @Override public void setBlur(float blur) {
-    for (int i = layers.size() - 1; i >= 0; i--) {
-      layers.get(i).setBlur(blur);
-    }
-  }
+
   @Override public void setProgress(@FloatRange(from = 0f, to = 1f) float progress) {
     super.setProgress(progress);
     if (timeRemapping != null) {
-      long duration = lottieDrawable.getComposition().getDuration();
+      float duration = lottieDrawable.getComposition().getDuration();
       long remappedTime = (long) (timeRemapping.getValue() * 1000);
-      progress = remappedTime / (float) duration;
+      progress = remappedTime / duration;
     }
     if (layerModel.getTimeStretch() != 0) {
       progress /= layerModel.getTimeStretch();
@@ -172,15 +177,25 @@ public class CompositionLayer extends BaseLayer {
     return hasMatte;
   }
 
-  @Override public void addColorFilter(@Nullable String layerName, @Nullable String contentName,
-      @Nullable ColorFilter colorFilter) {
-    for (int i = 0; i < layers.size(); ++i) {
-      final BaseLayer layer = layers.get(i);
-      final String name = layer.getLayerModel().getName();
-      if (layerName == null) {
-        layer.addColorFilter(null, null, colorFilter);
-      } else if (name.equals(layerName)) {
-        layer.addColorFilter(layerName, contentName, colorFilter);
+  @Override
+  protected void resolveChildKeyPath(KeyPath keyPath, int depth, List<KeyPath> accumulator,
+      KeyPath currentPartialKeyPath) {
+    for (int i = 0; i < layers.size(); i++) {
+      layers.get(i).resolveKeyPath(keyPath, depth, accumulator, currentPartialKeyPath);
+    }
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> void addValueCallback(T property, @Nullable LottieValueCallback<T> callback) {
+    super.addValueCallback(property, callback);
+
+    if (property == LottieProperty.TIME_REMAP) {
+      if (callback == null) {
+        timeRemapping = null;
+      } else {
+        timeRemapping = new ValueCallbackKeyframeAnimation<>((LottieValueCallback<Float>) callback);
+        addAnimation(timeRemapping);
       }
     }
   }

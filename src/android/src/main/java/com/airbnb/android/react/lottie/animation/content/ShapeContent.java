@@ -1,7 +1,7 @@
-package com.airbnb.android.react.lottie.animation.content;
+package com.airbnb.lottie.animation.content;
 
 import android.graphics.Path;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.LottieDrawable;
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
@@ -25,7 +25,6 @@ public class ShapeContent implements PathContent, BaseKeyframeAnimation.Animatio
   public ShapeContent(LottieDrawable lottieDrawable, BaseLayer layer, ShapePath shape) {
     name = shape.getName();
     this.lottieDrawable = lottieDrawable;
-
     shapeAnimation = shape.getShapePath().createAnimation();
     layer.addAnimation(shapeAnimation);
     shapeAnimation.addUpdateListener(this);
@@ -53,13 +52,12 @@ public class ShapeContent implements PathContent, BaseKeyframeAnimation.Animatio
   }
 
   @Override public Path getPath() {
-
     if (isPathValid) {
       return path;
     }
 
     path.reset();
-    
+
     path.set(shapeAnimation.getValue());
     path.setFillType(Path.FillType.EVEN_ODD);
 

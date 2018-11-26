@@ -1,4 +1,4 @@
-package com.airbnb.android.react.lottie.animation.content;
+package com.airbnb.lottie.animation.content;
 
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
 import com.airbnb.android.react.lottie.model.content.ShapeTrimPath;
@@ -9,7 +9,7 @@ import java.util.List;
 
 public class TrimPathContent implements Content, BaseKeyframeAnimation.AnimationListener {
 
-  private String name;
+  private final String name;
   private final List<BaseKeyframeAnimation.AnimationListener> listeners = new ArrayList<>();
   private final ShapeTrimPath.Type type;
   private final BaseKeyframeAnimation<?, Float> startAnimation;

@@ -1,19 +1,24 @@
-package com.airbnb.android.react.lottie.animation.content;
+package com.airbnb.lottie.animation.content;
 
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.LottieDrawable;
+import com.airbnb.android.react.lottie.LottieProperty;
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
+import com.airbnb.android.react.lottie.model.KeyPath;
 import com.airbnb.android.react.lottie.model.content.CircleShape;
 import com.airbnb.android.react.lottie.model.content.ShapeTrimPath;
 import com.airbnb.android.react.lottie.model.layer.BaseLayer;
+import com.airbnb.android.react.lottie.utils.MiscUtils;
 import com.airbnb.android.react.lottie.utils.Utils;
+import com.airbnb.android.react.lottie.value.LottieValueCallback;
 
 import java.util.List;
 
-public class EllipseContent implements PathContent, BaseKeyframeAnimation.AnimationListener {
+public class EllipseContent
+    implements PathContent, BaseKeyframeAnimation.AnimationListener, KeyPathElementContent {
   private static final float ELLIPSE_CONTROL_POINT_PERCENTAGE = 0.55228f;
 
   private final Path path = new Path();
@@ -105,5 +110,20 @@ public class EllipseContent implements PathContent, BaseKeyframeAnimation.Animat
 
     isPathValid = true;
     return path;
+  }
+
+  @Override public void resolveKeyPath(
+      KeyPath keyPath, int depth, List<KeyPath> accumulator, KeyPath currentPartialKeyPath) {
+    MiscUtils.resolveKeyPath(keyPath, depth, accumulator, currentPartialKeyPath, this);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> void addValueCallback(T property, @Nullable LottieValueCallback<T> callback) {
+    if (property == LottieProperty.ELLIPSE_SIZE) {
+      sizeAnimation.setValueCallback((LottieValueCallback<PointF>) callback);
+    } else if (property == LottieProperty.POSITION) {
+      positionAnimation.setValueCallback((LottieValueCallback<PointF>) callback);
+    }
   }
 }

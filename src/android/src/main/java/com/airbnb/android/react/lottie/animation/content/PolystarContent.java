@@ -1,19 +1,24 @@
-package com.airbnb.android.react.lottie.animation.content;
+package com.airbnb.lottie.animation.content;
 
 import android.graphics.Path;
 import android.graphics.PointF;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.LottieDrawable;
+import com.airbnb.android.react.lottie.LottieProperty;
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
+import com.airbnb.android.react.lottie.model.KeyPath;
 import com.airbnb.android.react.lottie.model.content.PolystarShape;
 import com.airbnb.android.react.lottie.model.content.ShapeTrimPath;
 import com.airbnb.android.react.lottie.model.layer.BaseLayer;
+import com.airbnb.android.react.lottie.utils.MiscUtils;
 import com.airbnb.android.react.lottie.utils.Utils;
+import com.airbnb.android.react.lottie.value.LottieValueCallback;
 
 import java.util.List;
 
-public class PolystarContent implements PathContent, BaseKeyframeAnimation.AnimationListener {
+public class PolystarContent
+    implements PathContent, BaseKeyframeAnimation.AnimationListener, KeyPathElementContent {
   /**
    * This was empirically derived by creating polystars, converting them to
    * curves, and calculating a scale factor.
@@ -73,8 +78,8 @@ public class PolystarContent implements PathContent, BaseKeyframeAnimation.Anima
     outerRadiusAnimation.addUpdateListener(this);
     outerRoundednessAnimation.addUpdateListener(this);
     if (type == PolystarShape.Type.Star) {
-      outerRadiusAnimation.addUpdateListener(this);
-      outerRoundednessAnimation.addUpdateListener(this);
+      innerRadiusAnimation.addUpdateListener(this);
+      innerRoundednessAnimation.addUpdateListener(this);
     }
   }
 
@@ -284,5 +289,31 @@ public class PolystarContent implements PathContent, BaseKeyframeAnimation.Anima
     PointF position = positionAnimation.getValue();
     path.offset(position.x, position.y);
     path.close();
+  }
+
+  @Override public void resolveKeyPath(
+      KeyPath keyPath, int depth, List<KeyPath> accumulator, KeyPath currentPartialKeyPath) {
+    MiscUtils.resolveKeyPath(keyPath, depth, accumulator, currentPartialKeyPath, this);
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public <T> void addValueCallback(T property, @Nullable LottieValueCallback<T> callback) {
+    if (property == LottieProperty.POLYSTAR_POINTS) {
+      pointsAnimation.setValueCallback((LottieValueCallback<Float>) callback);
+    } else if (property == LottieProperty.POLYSTAR_ROTATION) {
+      rotationAnimation.setValueCallback((LottieValueCallback<Float>) callback);
+    } else if (property == LottieProperty.POSITION) {
+      positionAnimation.setValueCallback((LottieValueCallback<PointF>) callback);
+    } else if (property == LottieProperty.POLYSTAR_INNER_RADIUS && innerRadiusAnimation != null) {
+      innerRadiusAnimation.setValueCallback((LottieValueCallback<Float>) callback);
+    } else if (property == LottieProperty.POLYSTAR_OUTER_RADIUS) {
+      outerRadiusAnimation.setValueCallback((LottieValueCallback<Float>) callback);
+    } else if (property == LottieProperty.POLYSTAR_INNER_ROUNDEDNESS &&
+        innerRoundednessAnimation != null) {
+      innerRoundednessAnimation.setValueCallback((LottieValueCallback<Float>) callback);
+    } else if (property == LottieProperty.POLYSTAR_OUTER_ROUNDEDNESS) {
+      outerRoundednessAnimation.setValueCallback((LottieValueCallback<Float>) callback);
+    }
   }
 }

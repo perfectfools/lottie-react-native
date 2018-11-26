@@ -1,42 +1,35 @@
 package com.airbnb.android.react.lottie;
 
-import android.util.Log;
-
-import org.json.JSONObject;
+import android.graphics.Bitmap;
+import androidx.annotation.Nullable;
+import androidx.annotation.RestrictTo;
 
 /**
  * Data class describing an image asset exported by bodymovin.
  */
-@SuppressWarnings("WeakerAccess")
 public class LottieImageAsset {
   private final int width;
   private final int height;
   private final String id;
   private final String fileName;
+  private final String dirName;
+  /** Pre-set a bitmap for this asset */
+  @Nullable private Bitmap bitmap;
 
-  private LottieImageAsset(int width, int height, String id, String fileName) {
+  @RestrictTo(RestrictTo.Scope.LIBRARY)
+  public LottieImageAsset(int width, int height, String id, String fileName, String dirName) {
     this.width = width;
     this.height = height;
     this.id = id;
     this.fileName = fileName;
+    this.dirName = dirName;
   }
 
-  static class Factory {
-    private Factory() {
-    }
-
-    static LottieImageAsset newInstance(JSONObject imageJson) {
-
-      return new LottieImageAsset(imageJson.optInt("w"), imageJson.optInt("h"), imageJson.optString("id"),
-          imageJson.optString("p"));
-    }
-  }
-
-  @SuppressWarnings("WeakerAccess") public int getWidth() {
+  public int getWidth() {
     return width;
   }
 
-  @SuppressWarnings("WeakerAccess")public int getHeight() {
+  public int getHeight() {
     return height;
   }
 
@@ -46,5 +39,23 @@ public class LottieImageAsset {
 
   public String getFileName() {
     return fileName;
+  }
+
+  @SuppressWarnings("unused") public String getDirName() {
+    return dirName;
+  }
+
+  /**
+   * Returns the bitmap that has been stored for this image asset if one was explicitly set.
+   */
+  @Nullable public Bitmap getBitmap() {
+    return bitmap;
+  }
+
+  /**
+   * TODO
+   */
+  public void setBitmap(@Nullable Bitmap bitmap) {
+    this.bitmap = bitmap;
   }
 }
