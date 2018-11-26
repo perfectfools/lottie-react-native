@@ -1,6 +1,6 @@
 {
   "name": "lottie-react-native",
-  "version": "2.5.9",
+  "version": "2.5.10",
   "description": "React Native bindings for Lottie",
   "main": "lib/index.js",
   "types": "src/js/index.d.ts",
@@ -66,7 +66,7 @@
     "eslint-plugin-react": "^6.1.2",
     "gitbook-cli": "^1.0.1",
     "react": "16.0.0",
-    "react-native": "0.50.3",
+    "react-native": "0.57.0",
     "eslint-config-prettier": "^2.8.0",
     "eslint-plugin-prettier": "^2.3.1",
     "prettier": "^1.8.2",
