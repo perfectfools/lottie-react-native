@@ -39,6 +39,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.airbnb.android.react.lottie.utils.Utils;
+
 /**
  * This view will load, deserialize, and display an After Effects animation exported with
  * bodymovin (https://github.com/bodymovin/bodymovin).
@@ -117,10 +119,14 @@ import java.util.Map;
 
   private void init(@Nullable AttributeSet attrs) {
     TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.LottieAnimationView);
-    int cacheStrategyOrdinal = ta.getInt(
+    int cacheStrategy = ta.getInt(
+            R.styleable.LottieAnimationView_lottie_cacheStrategy,
+            CacheStrategy.Weak.ordinal());
+    defaultCacheStrategy = CacheStrategy.values()[cacheStrategy];
+   /* int cacheStrategyOrdinal = ta.getInt(
         R.styleable.LottieAnimationView_lottie_cacheStrategy,
         DEFAULT_CACHE_STRATEGY.ordinal());
-    this.defaultCacheStrategy = CacheStrategy.values()[cacheStrategyOrdinal];
+    this.defaultCacheStrategy = CacheStrategy.values()[cacheStrategyOrdinal];*/
     if (!isInEditMode()) {
       boolean hasRawRes = ta.hasValue(R.styleable.LottieAnimationView_lottie_rawRes);
       boolean hasFileName = ta.hasValue(R.styleable.LottieAnimationView_lottie_fileName);
@@ -222,6 +228,7 @@ import java.util.Map;
     ss.isAnimating = lottieDrawable.isAnimating();
     ss.imageAssetsFolder = lottieDrawable.getImageAssetsFolder();
     ss.repeatMode = lottieDrawable.getRepeatMode();
+    ss.isLooping = lottieDrawable.isLooping();
     ss.repeatCount = lottieDrawable.getRepeatCount();
     return ss;
   }
@@ -243,6 +250,7 @@ import java.util.Map;
       setAnimation(animationResId);
     }
     setProgress(ss.progress);
+    //loop(ss.isLooping);
     if (ss.isAnimating) {
       playAnimation();
     }
@@ -345,6 +353,7 @@ import java.util.Map;
    * Will not cache the composition once loaded.
    */
   public void setAnimation(@RawRes int animationResId) {
+    Log.d("Palm", "Setanim rawres");
     setAnimation(animationResId, defaultCacheStrategy);
   }
 
@@ -357,6 +366,7 @@ import java.util.Map;
    * and deserialized. {@link CacheStrategy#Weak} will hold a weak reference to said composition.
    */
   public void setAnimation(@RawRes final int animationResId, final CacheStrategy cacheStrategy) {
+    Log.d("Palm", "Setanim rawres, final");
     this.animationResId = animationResId;
     animationName = null;
     if (RAW_RES_WEAK_REF_CACHE.indexOfKey(animationResId) > 0) {
@@ -396,6 +406,7 @@ import java.util.Map;
    * Will not cache the composition once loaded.
    */
   public void setAnimation(String animationName) {
+    Log.d("Palm", animationName.toString());
     setAnimation(animationName, defaultCacheStrategy);
   }
 
@@ -408,6 +419,7 @@ import java.util.Map;
    * and deserialized. {@link CacheStrategy#Weak} will hold a weak reference to said composition.
    */
   public void setAnimation(final String animationName, final CacheStrategy cacheStrategy) {
+    Log.d("Palm", animationName.toString());
     this.animationName = animationName;
     animationResId = 0;
     if (ASSET_WEAK_REF_CACHE.containsKey(animationName)) {
@@ -446,6 +458,7 @@ import java.util.Map;
    */
   @Deprecated
   public void setAnimation(JSONObject json) {
+    Log.d("Palm","jsonObject ");
     setAnimation(new JsonReader(new StringReader(json.toString())));
   }
 
@@ -455,6 +468,7 @@ import java.util.Map;
    * JSONObject never has to be done.
    */
   public void setAnimationFromJson(String jsonString) {
+    Log.d("Palm","form Json");
     setAnimation(new JsonReader(new StringReader(jsonString)));
   }
 
@@ -466,6 +480,7 @@ import java.util.Map;
    * bodymovin json from the network and pass it directly here.
    */
   public void setAnimation(JsonReader reader) {
+    Log.d("Palm","jsonreader");
     clearComposition();
     cancelLoaderTask();
     compositionLoader = LottieComposition.Factory.fromJsonReader(reader, loadedListener);
@@ -645,6 +660,8 @@ import java.util.Map;
   public void removeAnimatorListener(Animator.AnimatorListener listener) {
     lottieDrawable.removeAnimatorListener(listener);
   }
+
+
 
   public void removeAllAnimatorListeners() {
     lottieDrawable.removeAllAnimatorListeners();
@@ -892,6 +909,7 @@ import java.util.Map;
     int animationResId;
     float progress;
     boolean isAnimating;
+    boolean isLooping;
     String imageAssetsFolder;
     int repeatMode;
     int repeatCount;
@@ -906,6 +924,7 @@ import java.util.Map;
       progress = in.readFloat();
       isAnimating = in.readInt() == 1;
       imageAssetsFolder = in.readString();
+      isLooping = in.readInt() == 1;
       repeatMode = in.readInt();
       repeatCount = in.readInt();
     }
@@ -916,6 +935,7 @@ import java.util.Map;
       out.writeString(animationName);
       out.writeFloat(progress);
       out.writeInt(isAnimating ? 1 : 0);
+      out.writeInt(isLooping ? 1 : 0);
       out.writeString(imageAssetsFolder);
       out.writeInt(repeatMode);
       out.writeInt(repeatCount);
