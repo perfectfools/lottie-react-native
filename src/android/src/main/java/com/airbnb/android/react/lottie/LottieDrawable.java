@@ -337,7 +337,11 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
    */
   public void playAnimation() {
     if (compositionLayer == null) {
-      lazyCompositionTasks.add(c -> playAnimation());
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override public void run(LottieComposition composition) {
+          playAnimation();
+        }
+      });
       return;
     }
     animator.playAnimation();
@@ -354,7 +358,11 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
    */
   public void resumeAnimation() {
     if (compositionLayer == null) {
-      lazyCompositionTasks.add(c -> resumeAnimation());
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override public void run(LottieComposition composition) {
+          resumeAnimation();
+        }
+      });
       return;
     }
     animator.resumeAnimation();
@@ -379,7 +387,11 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
    */
    public void setMinProgress(final float minProgress) {
      if (composition == null) {
-       lazyCompositionTasks.add(c -> setMinProgress(minProgress));
+       lazyCompositionTasks.add(new LazyCompositionTask() {
+         @Override public void run(LottieComposition composition) {
+           setMinProgress(minProgress);
+         }
+       });
        return;
      }
    setMinFrame((int) MiscUtils.lerp(composition.getStartFrame(), composition.getEndFrame(), minProgress));
@@ -404,7 +416,12 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
    */
   public void setMaxProgress(@FloatRange(from = 0f, to = 1f) final float maxProgress) {
     if (composition == null) {
-      lazyCompositionTasks.add(c -> setMaxProgress(maxProgress));
+      lazyCompositionTasks.add(
+              new LazyCompositionTask() {
+                @Override public void run(LottieComposition composition) {
+                  setMaxProgress(maxProgress);
+                }
+              });
       return;
     }
     setMaxFrame((int) MiscUtils.lerp(composition.getStartFrame(), composition.getEndFrame(), maxProgress));
@@ -426,7 +443,11 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
       @FloatRange(from = 0f, to = 1f) final float minProgress,
       @FloatRange(from = 0f, to = 1f) final float maxProgress) {
     if (composition == null) {
-      lazyCompositionTasks.add(c -> setMinAndMaxProgress(minProgress, maxProgress));
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override public void run(LottieComposition composition) {
+          setMinAndMaxProgress(minProgress, maxProgress);
+        }
+      });
       return;
     }
 
@@ -489,7 +510,12 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
    */
   public void setFrame(final int frame) {
     if (composition == null) {
-      lazyCompositionTasks.add(c -> setFrame(frame));
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override
+        public void run(LottieComposition composition) {
+          setFrame(frame);
+        }
+      });
       return;
     }
 
@@ -505,7 +531,12 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
 
   public void setProgress(@FloatRange(from = 0f, to = 1f) final float progress) {
     if (composition == null) {
-      lazyCompositionTasks.add(c -> setProgress(progress));
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override
+        public void run(LottieComposition composition) {
+          setProgress(progress);
+        }
+      });
       return;
     }
     setFrame((int) MiscUtils.lerp(composition.getStartFrame(), composition.getEndFrame(), progress));
@@ -701,7 +732,12 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
   public <T> void addValueCallback(
       final KeyPath keyPath, final T property, final LottieValueCallback<T> callback) {
     if (compositionLayer == null) {
-      lazyCompositionTasks.add(c -> addValueCallback(keyPath, property, callback));
+      lazyCompositionTasks.add(new LazyCompositionTask() {
+        @Override
+        public void run(LottieComposition composition) {
+          addValueCallback(keyPath, property, callback);
+        }
+      });
       return;
     }
     boolean invalidate;
