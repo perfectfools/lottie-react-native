@@ -3,8 +3,8 @@ package com.airbnb.android.react.lottie;
 import android.util.JsonReader;
 import android.widget.ImageView;
 
-import com.airbnb.android.react.lottie.LottieAnimationView;
-import com.airbnb.android.react.lottie.LottieDrawable;
+import com.airbnb.lottie.LottieAnimationView;
+import com.airbnb.lottie.LottieDrawable;
 
 import java.io.StringReader;
 import java.lang.ref.WeakReference;
