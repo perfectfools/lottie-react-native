@@ -1,4 +1,4 @@
-package com.airbnb.lottie.animation.content;
+package com.airbnb.android.react.lottie.animation.content;
 
 import android.graphics.Path;
 

@@ -1,4 +1,4 @@
-package com.airbnb.lottie.model.animatable;
+package com.airbnb.android.react.lottie.model.animatable;
 
 import android.graphics.Path;
 

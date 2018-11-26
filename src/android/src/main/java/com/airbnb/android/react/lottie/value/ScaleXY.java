@@ -1,4 +1,4 @@
-package com.airbnb.lottie.value;
+package com.airbnb.android.react.lottie.value;
 
 public class ScaleXY {
   private final float scaleX;

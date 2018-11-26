@@ -46,7 +46,7 @@ import java.util.Set;
  * If there are masks or mattes, then you MUST call {@link #recycleBitmaps()} when you are done
  * or else you will leak bitmaps.
  * <p>
- * It is preferable to use {@link com.airbnb.lottie.LottieAnimationView} when possible because it
+ * It is preferable to use {@link com.airbnb.android.react.lottie.LottieAnimationView} when possible because it
  * handles bitmap recycling and asynchronous loading
  * of compositions.
  */

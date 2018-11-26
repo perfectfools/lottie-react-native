@@ -1,4 +1,4 @@
-package com.airbnb.lottie.utils;
+package com.airbnb.android.react.lottie.utils;
 
 import android.content.res.Resources;
 import android.graphics.Matrix;

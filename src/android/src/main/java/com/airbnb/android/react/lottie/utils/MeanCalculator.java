@@ -1,4 +1,4 @@
-package com.airbnb.lottie.utils;
+package com.airbnb.android.react.lottie.utils;
 
 /**
  * Class to calculate the average in a stream of numbers on a continuous basis.

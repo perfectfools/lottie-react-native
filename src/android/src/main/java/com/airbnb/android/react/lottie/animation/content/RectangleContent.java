@@ -1,4 +1,4 @@
-package com.airbnb.lottie.animation.content;
+package com.airbnb.android.react.lottie.animation.content;
 
 import android.graphics.Path;
 import android.graphics.PointF;
@@ -6,6 +6,7 @@ import android.graphics.RectF;
 import androidx.annotation.Nullable;
 
 import com.airbnb.android.react.lottie.LottieDrawable;
+
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
 import com.airbnb.android.react.lottie.model.KeyPath;
 import com.airbnb.android.react.lottie.model.content.RectangleShape;

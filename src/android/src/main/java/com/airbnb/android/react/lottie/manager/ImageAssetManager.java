@@ -1,4 +1,4 @@
-package com.airbnb.lottie.manager;
+package com.airbnb.android.react.lottie.manager;
 
 import android.content.Context;
 import android.graphics.Bitmap;

@@ -1,4 +1,4 @@
-package com.airbnb.lottie.model.layer;
+package com.airbnb.android.react.lottie.model.layer;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

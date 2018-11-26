@@ -1,5 +1,5 @@
 @RestrictTo(LIBRARY)
-package com.airbnb.lottie.model.content;
+package com.airbnb.android.react.lottie.model.content;
 
 import androidx.annotation.RestrictTo;
 

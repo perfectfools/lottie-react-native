@@ -1,4 +1,4 @@
-package com.airbnb.lottie.animation.content;
+package com.airbnb.android.react.lottie.animation.content;
 
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
@@ -30,7 +30,7 @@ import com.airbnb.android.react.lottie.value.LottieValueCallback;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.airbnb.lottie.utils.MiscUtils.clamp;
+import static com.airbnb.android.react.lottie.utils.MiscUtils.clamp;
 
 public class GradientFillContent
     implements DrawingContent, BaseKeyframeAnimation.AnimationListener, KeyPathElementContent {

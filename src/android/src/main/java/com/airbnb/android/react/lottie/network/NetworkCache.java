@@ -1,4 +1,4 @@
-package com.airbnb.lottie.network;
+package com.airbnb.android.react.lottie.network;
 
 import android.content.Context;
 import androidx.annotation.Nullable;

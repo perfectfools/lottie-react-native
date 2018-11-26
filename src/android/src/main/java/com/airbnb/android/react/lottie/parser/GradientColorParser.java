@@ -1,4 +1,4 @@
-package com.airbnb.lottie.parser;
+package com.airbnb.android.react.lottie.parser;
 
 import android.graphics.Color;
 import androidx.annotation.IntRange;
@@ -12,7 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GradientColorParser implements com.airbnb.lottie.parser.ValueParser<GradientColor> {
+public class GradientColorParser implements com.airbnb.android.react.lottie.parser.ValueParser<GradientColor> {
   /** The number of colors if it exists in the json or -1 if it doesn't (legacy bodymovin) */
   private int colorPoints;
 

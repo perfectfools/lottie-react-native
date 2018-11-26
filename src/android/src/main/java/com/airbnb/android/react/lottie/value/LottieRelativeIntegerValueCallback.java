@@ -2,7 +2,7 @@
 
 
 
-package com.airbnb.lottie.value;
+package com.airbnb.android.react.lottie.value;
 
 import com.airbnb.android.react.lottie.utils.MiscUtils;
 

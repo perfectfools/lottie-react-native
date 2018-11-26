@@ -1,4 +1,4 @@
-package com.airbnb.lottie.animation.keyframe;
+package com.airbnb.android.react.lottie.animation.keyframe;
 
 import android.graphics.Matrix;
 import android.graphics.PointF;
@@ -9,13 +9,13 @@ import com.airbnb.android.react.lottie.value.ScaleXY;
 import com.airbnb.android.react.lottie.model.animatable.AnimatableTransform;
 import com.airbnb.android.react.lottie.model.layer.BaseLayer;
 
-import static com.airbnb.lottie.LottieProperty.TRANSFORM_ANCHOR_POINT;
-import static com.airbnb.lottie.LottieProperty.TRANSFORM_END_OPACITY;
-import static com.airbnb.lottie.LottieProperty.TRANSFORM_OPACITY;
-import static com.airbnb.lottie.LottieProperty.TRANSFORM_POSITION;
-import static com.airbnb.lottie.LottieProperty.TRANSFORM_ROTATION;
-import static com.airbnb.lottie.LottieProperty.TRANSFORM_SCALE;
-import static com.airbnb.lottie.LottieProperty.TRANSFORM_START_OPACITY;
+import static com.airbnb.android.react.lottie.LottieProperty.TRANSFORM_ANCHOR_POINT;
+import static com.airbnb.android.react.lottie.LottieProperty.TRANSFORM_END_OPACITY;
+import static com.airbnb.android.react.lottie.LottieProperty.TRANSFORM_OPACITY;
+import static com.airbnb.android.react.lottie.LottieProperty.TRANSFORM_POSITION;
+import static com.airbnb.android.react.lottie.LottieProperty.TRANSFORM_ROTATION;
+import static com.airbnb.android.react.lottie.LottieProperty.TRANSFORM_SCALE;
+import static com.airbnb.android.react.lottie.LottieProperty.TRANSFORM_START_OPACITY;
 
 public class TransformKeyframeAnimation {
   private final Matrix matrix = new Matrix();

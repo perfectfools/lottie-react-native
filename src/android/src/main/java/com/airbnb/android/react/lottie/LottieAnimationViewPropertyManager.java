@@ -141,8 +141,8 @@ public class LottieAnimationViewPropertyManager {
     }
 
     if (enableMergePaths != null) {
-        view.enableMergePathsForKitKatAndAbove(enableMergePaths);
-        enableMergePaths = null;
+      view.enableMergePathsForKitKatAndAbove(enableMergePaths);
+      enableMergePaths = null;
     }
   }
 }

@@ -22,6 +22,8 @@ import android.util.AttributeSet;
 import android.util.JsonReader;
 import android.util.Log;
 
+import com.airbnb.android.react.lottie.utils.Utils;
+
 import com.airbnb.android.react.lottie.model.KeyPath;
 import com.airbnb.android.react.lottie.value.LottieFrameInfo;
 import com.airbnb.android.react.lottie.value.LottieValueCallback;
@@ -101,7 +103,7 @@ import java.util.Set;
       boolean hasUrl = ta.hasValue(R.styleable.LottieAnimationView_lottie_url);
       if (hasRawRes && hasFileName) {
         throw new IllegalArgumentException("lottie_rawRes and lottie_fileName cannot be used at " +
-            "the same time. Please use only one at once.");
+                "the same time. Please use only one at once.");
       } else if (hasRawRes) {
         int rawResId = ta.getResourceId(R.styleable.LottieAnimationView_lottie_rawRes, 0);
         if (rawResId != 0) {
@@ -130,21 +132,21 @@ import java.util.Set;
 
     if (ta.hasValue(R.styleable.LottieAnimationView_lottie_repeatMode)) {
       setRepeatMode(ta.getInt(R.styleable.LottieAnimationView_lottie_repeatMode,
-          LottieDrawable.RESTART));
+              LottieDrawable.RESTART));
     }
 
     if (ta.hasValue(R.styleable.LottieAnimationView_lottie_repeatCount)) {
       setRepeatCount(ta.getInt(R.styleable.LottieAnimationView_lottie_repeatCount,
-          LottieDrawable.INFINITE));
+              LottieDrawable.INFINITE));
     }
 
     setImageAssetsFolder(ta.getString(R.styleable.LottieAnimationView_lottie_imageAssetsFolder));
     setProgress(ta.getFloat(R.styleable.LottieAnimationView_lottie_progress, 0));
     enableMergePathsForKitKatAndAbove(ta.getBoolean(
-        R.styleable.LottieAnimationView_lottie_enableMergePathsForKitKatAndAbove, false));
+            R.styleable.LottieAnimationView_lottie_enableMergePathsForKitKatAndAbove, false));
     if (ta.hasValue(R.styleable.LottieAnimationView_lottie_colorFilter)) {
       SimpleColorFilter filter = new SimpleColorFilter(
-          ta.getColor(R.styleable.LottieAnimationView_lottie_colorFilter, Color.TRANSPARENT));
+              ta.getColor(R.styleable.LottieAnimationView_lottie_colorFilter, Color.TRANSPARENT));
       KeyPath keyPath = new KeyPath("**");
       LottieValueCallback<ColorFilter> callback = new LottieValueCallback<ColorFilter>(filter);
       addValueCallback(keyPath, LottieProperty.COLOR_FILTER, callback);
@@ -418,7 +420,7 @@ import java.util.Set;
     requestLayout();
 
     for (LottieOnCompositionLoadedListener lottieOnCompositionLoadedListener : lottieOnCompositionLoadedListeners) {
-        lottieOnCompositionLoadedListener.onCompositionLoaded(composition);
+      lottieOnCompositionLoadedListener.onCompositionLoaded(composition);
     }
 
   }
@@ -516,8 +518,8 @@ import java.util.Set;
    * @see #setMaxProgress(float)
    */
   public void setMinAndMaxProgress(
-      @FloatRange(from = 0f, to = 1f) float minProgress,
-      @FloatRange(from = 0f, to = 1f) float maxProgress) {
+          @FloatRange(from = 0f, to = 1f) float minProgress,
+          @FloatRange(from = 0f, to = 1f) float maxProgress) {
     lottieDrawable.setMinAndMaxProgress(minProgress, maxProgress);
   }
 
@@ -677,7 +679,7 @@ import java.util.Set;
    * Use this to manually set fonts.
    */
   public void setFontAssetDelegate(
-      @SuppressWarnings("NullableProblems") FontAssetDelegate assetDelegate) {
+          @SuppressWarnings("NullableProblems") FontAssetDelegate assetDelegate) {
     lottieDrawable.setFontAssetDelegate(assetDelegate);
   }
 
@@ -717,7 +719,7 @@ import java.util.Set;
    * animationView.addValueCallback(yourKeyPath, LottieProperty.COLOR) { yourColor }
    */
   public <T> void addValueCallback(KeyPath keyPath, T property,
-      final SimpleLottieValueCallback<T> callback) {
+                                   final SimpleLottieValueCallback<T> callback) {
     lottieDrawable.addValueCallback(keyPath, property, new LottieValueCallback<T>() {
       @Override public T getValue(LottieFrameInfo<T> frameInfo) {
         return callback.getValue(frameInfo);
@@ -855,16 +857,16 @@ import java.util.Set;
     }
 
     public static final Parcelable.Creator<SavedState> CREATOR =
-        new Parcelable.Creator<SavedState>() {
-          @Override
-          public SavedState createFromParcel(Parcel in) {
-            return new SavedState(in);
-          }
+            new Parcelable.Creator<SavedState>() {
+              @Override
+              public SavedState createFromParcel(Parcel in) {
+                return new SavedState(in);
+              }
 
-          @Override
-          public SavedState[] newArray(int size) {
-            return new SavedState[size];
-          }
-        };
+              @Override
+              public SavedState[] newArray(int size) {
+                return new SavedState[size];
+              }
+            };
   }
 }

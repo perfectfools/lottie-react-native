@@ -1,4 +1,4 @@
-package com.airbnb.lottie.value;
+package com.airbnb.android.react.lottie.value;
 
 /**
  * Delegate interface for {@link LottieValueCallback}. This is helpful for the Kotlin API because you can use a SAM conversion to write the

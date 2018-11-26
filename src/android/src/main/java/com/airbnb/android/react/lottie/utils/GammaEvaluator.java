@@ -1,4 +1,4 @@
-package com.airbnb.lottie.utils;
+package com.airbnb.android.react.lottie.utils;
 
 /**
  * Use this instead of {@link android.animation.ArgbEvaluator} because it interpolates through the gamma color

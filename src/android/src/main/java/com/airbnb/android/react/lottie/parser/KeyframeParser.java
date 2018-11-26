@@ -1,4 +1,4 @@
-package com.airbnb.lottie.parser;
+package com.airbnb.android.react.lottie.parser;
 
 import android.graphics.PointF;
 import androidx.annotation.Nullable;

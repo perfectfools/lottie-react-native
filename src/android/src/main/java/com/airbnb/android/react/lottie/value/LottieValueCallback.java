@@ -1,4 +1,4 @@
-package com.airbnb.lottie.value;
+package com.airbnb.android.react.lottie.value;
 
 
 import androidx.annotation.Nullable;
@@ -7,7 +7,7 @@ import androidx.annotation.RestrictTo;
 import com.airbnb.android.react.lottie.animation.keyframe.BaseKeyframeAnimation;
 
 /**
- * Allows you to set a callback on a resolved {@link com.airbnb.lottie.model.KeyPath} to modify
+ * Allows you to set a callback on a resolved {@link com.airbnb.android.react.lottie.model.KeyPath} to modify
  * its animation values at runtime.
  */
 public class LottieValueCallback<T> {

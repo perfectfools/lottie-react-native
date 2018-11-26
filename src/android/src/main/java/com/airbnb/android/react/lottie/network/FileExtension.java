@@ -1,4 +1,4 @@
-package com.airbnb.lottie.network;
+package com.airbnb.android.react.lottie.network;
 
 import android.util.JsonReader;
 

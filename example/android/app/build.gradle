@@ -101,7 +101,7 @@ android {
     buildToolsVersion "27.0.3"
 
     defaultConfig {
-        applicationId "com.airbnb.android"
+        applicationId "com.airbnb.android.react.lottie"
         minSdkVersion 19
         targetSdkVersion 27
         versionCode 1
@@ -141,8 +141,8 @@ android {
 
 dependencies {
     compile project(':lottie-react-native')
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support:support-annotations:26.1.0'
+    compile 'com.android.support:appcompat-v7:27.1.1'
+    compile 'com.android.support:support-annotations:27.1.1'
     compile "com.facebook.react:react-native:+"  // From node_modules
 
 }

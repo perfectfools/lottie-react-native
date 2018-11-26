@@ -26,7 +26,7 @@ import java.util.concurrent.Callable;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import static com.airbnb.lottie.utils.Utils.closeQuietly;
+import static com.airbnb.android.react.lottie.utils.Utils.closeQuietly;
 
 /**
  * Helpers to create or cache a LottieComposition.

@@ -1,4 +1,4 @@
-package com.airbnb.lottie.animation.keyframe;
+package com.airbnb.android.react.lottie.animation.keyframe;
 
 import androidx.annotation.FloatRange;
 import androidx.annotation.Nullable;

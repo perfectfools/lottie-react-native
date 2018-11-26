@@ -1,4 +1,4 @@
-package com.airbnb.lottie.model;
+package com.airbnb.android.react.lottie.model;
 
 import android.graphics.PointF;
 import androidx.annotation.RestrictTo;

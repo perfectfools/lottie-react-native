@@ -32,8 +32,8 @@ import java.util.Map;
  *
  * To create one, use {@link LottieCompositionFactory}.
  *
- * It can be used with a {@link com.airbnb.lottie.LottieAnimationView} or
- * {@link com.airbnb.lottie.LottieDrawable}.
+ * It can be used with a {@link com.airbnb.android.react.lottie.LottieAnimationView} or
+ * {@link com.airbnb.android.react.lottie.LottieDrawable}.
  */
 public class LottieComposition {
 

@@ -35,4 +35,8 @@ dependencies {
   compile "com.android.support:appcompat-v7:${safeExtGet('supportLibVersion', '27.1.1')}"
   compileOnly "com.facebook.react:react-native:+"
   //implementation 'com.airbnb.android:lottie:2.5.5'
+  implementation "androidx.appcompat:appcompat:${androidXVersion}"
+  testImplementation "org.mockito:mockito-core:2.15.0"
+  testImplementation 'junit:junit:4.12'
+  testImplementation "org.robolectric:robolectric:4.0-alpha-3"
 }

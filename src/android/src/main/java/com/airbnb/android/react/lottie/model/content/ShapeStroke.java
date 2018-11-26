@@ -1,4 +1,4 @@
-package com.airbnb.lottie.model.content;
+package com.airbnb.android.react.lottie.model.content;
 
 import android.graphics.Paint;
 import androidx.annotation.Nullable;

@@ -1,4 +1,4 @@
-package com.airbnb.lottie.utils;
+package com.airbnb.android.react.lottie.utils;
 
 import android.animation.ValueAnimator;
 import androidx.annotation.FloatRange;
