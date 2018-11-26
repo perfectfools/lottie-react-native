@@ -30,5 +30,7 @@
 - (void)playFromFrame:(NSNumber *)startFrame
               toFrame:(NSNumber *)endFrame;
 - (void)reset;
+- (void)pause;
+- (void)resume;
 
 @end

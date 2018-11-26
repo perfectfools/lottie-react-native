@@ -78,6 +78,18 @@
   }
 }
 
+- (void)resume {
+    if (_animationView != nil) {
+        [_animationView play];
+    }
+}
+
+- (void)pause {
+    if (_animationView != nil) {
+        [_animationView pause];
+    }
+}
+
 - (void)playFromFrame:(NSNumber *)startFrame
               toFrame:(NSNumber *)endFrame {
   if (_animationView != nil) {
