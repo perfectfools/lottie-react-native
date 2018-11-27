@@ -25,9 +25,9 @@
 {
     if (_animationView != nil) {
         [_animationView setBlurAmount:blur];
-        //_animationView.blur = blur;
     }
 }
+
 - (void)reactSetFrame:(CGRect)frame
 {
   [super reactSetFrame:frame];

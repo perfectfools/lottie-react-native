@@ -109,7 +109,6 @@ static NSString * const kCompContainerAnimationKey = @"play";
 }
 -(void)addBlur{
     self.initBlur = true;
-    NSLog(@"InitBLUR");
     self.blurEffectView = [[UIVisualEffectView alloc] init];
     self.blurEffectView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.blurEffectView.frame = self.frame;
@@ -129,10 +128,8 @@ static NSString * const kCompContainerAnimationKey = @"play";
     if (blur && ![self.blur isEqualToNumber:blur]) {
         self.blur = blur;
         if(self.initBlur){
-            NSLog(@"UPDATE");
         [self updateBlurEffect];
         } else {
-            NSLog(@"InitBLUR");
            [self addBlur];
         }
     }
