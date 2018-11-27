@@ -4,7 +4,7 @@
 
 Added support for Blur on Lottie shapes, strokes and fills, with amount param to react. (Android).
 
-Lottie component for React Native (iOS and Android)
+Lottie component for React Native (iOS and Android) Lottie (2.5.6)
 
 Lottie is a mobile library for Android and iOS that parses [Adobe After Effects](http://www.adobe.com/products/aftereffects.html) animations exported as JSON with [bodymovin](https://github.com/bodymovin/bodymovin) and renders them natively on mobile!
 
