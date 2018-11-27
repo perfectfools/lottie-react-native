@@ -11,6 +11,7 @@
 #import "LOTComposition.h"
 #import "LOTKeypath.h"
 #import "LOTValueDelegate.h"
+#import "BlurEffectWithAmount.h"
 
 typedef void (^LOTAnimationCompletionBlock)(BOOL animationFinished);
 
@@ -70,6 +71,16 @@ typedef void (^LOTAnimationCompletionBlock)(BOOL animationFinished);
 /// Set the amimation data
 @property (nonatomic, strong, nullable) LOTComposition *sceneModel;
 
+@property (nonatomic, assign) BOOL initBlur;
+@property (nonatomic, copy) NSString *blurType;
+@property (nonatomic, assign) NSNumber *blur;
+
+@property (nonatomic, strong) BlurEffectWithAmount *blurEffect;
+@property (nonatomic, strong) UIVisualEffectView *blurEffectView;
+
+-(void)setBlurAmount:(nonnull NSNumber *)blur;
+
+- (void)updateBlurEffect;
 /* 
  * Plays the animation from its current position to a specific progress.
  * The animation will start from its current position.

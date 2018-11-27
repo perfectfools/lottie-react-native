@@ -13,6 +13,7 @@
 #import "LOTAnimationView_Internal.h"
 #import "LOTAnimationCache.h"
 #import "LOTCompositionContainer.h"
+#import "BlurEffectWithAmount.h"
 
 static NSString * const kCompContainerAnimationKey = @"play";
 
@@ -60,6 +61,7 @@ static NSString * const kCompContainerAnimationKey = @"play";
   self = [super initWithFrame:CGRectZero];
   if (self) {
     [self _commonInit];
+     
     LOTComposition *laScene = [[LOTAnimationCache sharedCache] animationForKey:url.absoluteString];
     if (laScene) {
       laScene.cacheKey = url.absoluteString;
@@ -88,6 +90,7 @@ static NSString * const kCompContainerAnimationKey = @"play";
       });
     }
   }
+   
   return self;
 }
 
@@ -98,10 +101,62 @@ static NSString * const kCompContainerAnimationKey = @"play";
     [self _commonInit];
     [self _initializeAnimationContainer];
     [self _setupWithSceneModel:model];
+      if(self.blur){
+          [self addBlur];
+      }
   }
   return self;
 }
-
+-(void)addBlur{
+    self.initBlur = true;
+    NSLog(@"InitBLUR");
+    self.blurEffectView = [[UIVisualEffectView alloc] init];
+    self.blurEffectView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.blurEffectView.frame = self.frame;
+    
+    self.blurType = @"light";
+    [self updateBlurEffect];
+    
+    self.clipsToBounds = true;
+    
+    [self addSubview:self.blurEffectView];
+}
+- (void)setBlurAmount:(NSNumber *)blur
+{
+    if(!self.blur){
+        self.blur = @0;
+    }
+    if (blur && ![self.blur isEqualToNumber:blur]) {
+        self.blur = blur;
+        if(self.initBlur){
+            NSLog(@"UPDATE");
+        [self updateBlurEffect];
+        } else {
+            NSLog(@"InitBLUR");
+           [self addBlur];
+        }
+    }
+}
+- (UIBlurEffectStyle)blurEffectStyle
+{
+    if ([self.blurType isEqual: @"xlight"]) return UIBlurEffectStyleExtraLight;
+    if ([self.blurType isEqual: @"light"]) return UIBlurEffectStyleLight;
+    if ([self.blurType isEqual: @"dark"]) return UIBlurEffectStyleDark;
+    
+#if TARGET_OS_TV
+    if ([self.blurType isEqual: @"extraDark"]) return UIBlurEffectStyleExtraDark;
+    if ([self.blurType isEqual: @"regular"]) return UIBlurEffectStyleRegular;
+    if ([self.blurType isEqual: @"prominent"]) return UIBlurEffectStyleProminent;
+#endif
+    
+    return UIBlurEffectStyleDark;
+}
+- (void)updateBlurEffect
+{
+    UIBlurEffectStyle style = [self blurEffectStyle];
+    self.blurEffect = [BlurEffectWithAmount effectWithStyle:style andBlurAmount:self.blur];
+    self.blurEffectView.effect = self.blurEffect;
+}
 - (instancetype)init {
   self = [super init];
   if (self) {
@@ -158,6 +213,7 @@ static NSString * const kCompContainerAnimationKey = @"play";
   _sceneModel = model;
   _compContainer = [[LOTCompositionContainer alloc] initWithModel:nil inLayerGroup:nil withLayerGroup:_sceneModel.layerGroup withAssestGroup:_sceneModel.assetGroup];
   [self.layer addSublayer:_compContainer];
+    
   [self _restoreState];
   [self setNeedsLayout];
 }
@@ -463,13 +519,16 @@ static NSString * const kCompContainerAnimationKey = @"play";
 
 - (void)addSubview:(nonnull LOTView *)view
     toKeypathLayer:(nonnull LOTKeypath *)keypath {
+    NSLog(@"%@", @"HEJ HOPP");
   [self _layoutAndForceUpdate];
   CGRect viewRect = view.frame;
   LOTView *wrapperView = [[LOTView alloc] initWithFrame:viewRect];
   view.frame = view.bounds;
   view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  [wrapperView addSubview:view];
+    [wrapperView addSubview:view];
+    
   [self addSubview:wrapperView];
+    
   [_compContainer addSublayer:wrapperView.layer toKeypathLayer:keypath];
 }
 
@@ -491,6 +550,7 @@ static NSString * const kCompContainerAnimationKey = @"play";
 - (void)addSubview:(nonnull LOTView *)view
     toKeypathLayer:(nonnull LOTKeypath *)keypath {
   [self _layout];
+    
   CGRect viewRect = view.frame;
   LOTView *wrapperView = [[LOTView alloc] initWithFrame:viewRect];
   view.frame = view.bounds;

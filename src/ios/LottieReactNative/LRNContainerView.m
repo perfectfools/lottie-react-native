@@ -21,6 +21,13 @@
   LOTAnimationView *_animationView;
 }
 
+-(void)setBlur:(NSNumber *)blur
+{
+    if (_animationView != nil) {
+        [_animationView setBlurAmount:blur];
+        //_animationView.blur = blur;
+    }
+}
 - (void)reactSetFrame:(CGRect)frame
 {
   [super reactSetFrame:frame];
@@ -28,7 +35,6 @@
     [_animationView reactSetFrame:frame];
   }
 }
-
 - (void)setProgress:(CGFloat)progress {
   _progress = progress;
   if (_animationView != nil) {

@@ -15,6 +15,7 @@
   self = [super init];
   if (self) {
     [self _mapFromJSON:jsonDictionary];
+    
   }
   return self;
 }

@@ -70,7 +70,6 @@
 		B466903A21AD630000E57004 /* LOTAnimatedControl.m in Sources */ = {isa = PBXBuildFile; fileRef = B4668FFD21AD630000E57004 /* LOTAnimatedControl.m */; };
 		B466903B21AD630000E57004 /* LOTInterpolatorCallback.m in Sources */ = {isa = PBXBuildFile; fileRef = B4668FFE21AD630000E57004 /* LOTInterpolatorCallback.m */; };
 		B466903C21AD630000E57004 /* LOTAnimatedSwitch.m in Sources */ = {isa = PBXBuildFile; fileRef = B4668FFF21AD630000E57004 /* LOTAnimatedSwitch.m */; };
-		B498313C21ADA134005D3E51 /* BlurEffectWithAmount.m in Sources */ = {isa = PBXBuildFile; fileRef = B498313B21ADA134005D3E51 /* BlurEffectWithAmount.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -220,8 +219,6 @@
 		B4668FFD21AD630000E57004 /* LOTAnimatedControl.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOTAnimatedControl.m; sourceTree = "<group>"; };
 		B4668FFE21AD630000E57004 /* LOTInterpolatorCallback.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOTInterpolatorCallback.m; sourceTree = "<group>"; };
 		B4668FFF21AD630000E57004 /* LOTAnimatedSwitch.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LOTAnimatedSwitch.m; sourceTree = "<group>"; };
-		B498313A21ADA108005D3E51 /* BlurEffectWithAmount.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BlurEffectWithAmount.h; sourceTree = "<group>"; };
-		B498313B21ADA134005D3E51 /* BlurEffectWithAmount.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BlurEffectWithAmount.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -491,8 +488,6 @@
 				B4668FFD21AD630000E57004 /* LOTAnimatedControl.m */,
 				B4668FFE21AD630000E57004 /* LOTInterpolatorCallback.m */,
 				B4668FFF21AD630000E57004 /* LOTAnimatedSwitch.m */,
-				B498313A21ADA108005D3E51 /* BlurEffectWithAmount.h */,
-				B498313B21ADA134005D3E51 /* BlurEffectWithAmount.m */,
 			);
 			path = Private;
 			sourceTree = "<group>";
@@ -588,7 +583,6 @@
 				B466902321AD630000E57004 /* LOTLayerGroup.m in Sources */,
 				B466903B21AD630000E57004 /* LOTInterpolatorCallback.m in Sources */,
 				B466901021AD630000E57004 /* LOTRenderGroup.m in Sources */,
-				B498313C21ADA134005D3E51 /* BlurEffectWithAmount.m in Sources */,
 				B466902521AD630000E57004 /* LOTShapeTrimPath.m in Sources */,
 				B466901C21AD630000E57004 /* UIBezierPath.m in Sources */,
 				B466901521AD630000E57004 /* LOTLayerContainer.m in Sources */,

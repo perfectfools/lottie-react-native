@@ -22,6 +22,8 @@ const LottieViewManager = SafeModule.module({
   mock: {
     play: () => {},
     reset: () => {},
+    resume: () => {},
+    pause: () => {},
   },
 });
 
@@ -105,6 +107,14 @@ class LottieView extends React.Component {
 
   reset() {
     this.runCommand('reset');
+  }
+
+  pause() {
+    this.runCommand('pause');
+  }
+
+  resume() {
+    this.runCommand('resume');
   }
 
   runCommand(name, args = []) {

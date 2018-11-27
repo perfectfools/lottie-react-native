@@ -41,6 +41,15 @@
     _containerLayer = [CALayer layer];
     _containerLayer.actions = @{@"transform": [NSNull null],
                                 @"opacity": [NSNull null]};
+    
+//      CALayer *blurLayer = [CALayer layer];
+//      CIFilter *blur = [CIFilter filterWithName:@"CIGaussianBlur"];
+//      [blur setDefaults];
+//      _containerLayer.backgroundFilters = [NSArray arrayWithObject:blur];
+//      [_containerLayer addSublayer:blurLayer];
+//
+      
+      
     [self buildContents:contents];
   }
   return self;
@@ -71,6 +80,7 @@
     if ([item isKindOfClass:[LOTShapeFill class]]) {
       LOTFillRenderer *fillRenderer = [[LOTFillRenderer alloc] initWithInputNode:previousNode
                                                                        shapeFill:(LOTShapeFill *)item];
+        
       [self.containerLayer insertSublayer:fillRenderer.outputLayer atIndex:0];
       previousNode = fillRenderer;
     } else if ([item isKindOfClass:[LOTShapeStroke class]]) {
@@ -120,6 +130,8 @@
       [self.containerLayer insertSublayer:repeater.outputLayer atIndex:0];
     }
   }
+   
+    
   if (transform) {
     _opacityInterpolator = [[LOTNumberInterpolator alloc] initWithKeyframes:transform.opacity.keyframes];
     _transformInterolator = [[LOTTransformInterpolator alloc] initWithPosition:transform.position.keyframes

@@ -30,7 +30,13 @@
       [self.outputLayer addSublayer:centerPoint_DEBUG];
     }
     _evenOddFillRule = fill.evenOddFillRule;
-    
+     
+//      self.outputLayer.shadowRadius = 25;
+//      self.outputLayer.shadowOpacity = 1;
+//
+//      self.outputLayer.shadowColor = [colorInterpolator_ colorForFrame:self.currentFrame];
+      
+      
     self.outputLayer.fillRule = _evenOddFillRule ? @"even-odd" : @"non-zero";
   }
   return self;
@@ -49,6 +55,18 @@
   centerPoint_DEBUG.backgroundColor =  [colorInterpolator_ colorForFrame:self.currentFrame];
   centerPoint_DEBUG.borderColor = [UIColor lightGrayColor].CGColor;
   centerPoint_DEBUG.borderWidth = 2.f;
+    
+    //CALayer *blurLayer = [CALayer layer];
+//    CIFilter *blur = [CIFilter filterWithName:@"CIGaussianBlur"];
+//    blur.name=@"Myfilt";
+//    [blur setValue:[NSNumber numberWithFloat:250] forKey:@"inputRadius"];
+//    self.outputLayer.backgroundFilters = [NSArray arrayWithObject:blur];
+    //[_containerLayer addSublayer:blurLayer];
+   // [self.outputLayer insertSublayer:blurLayer atIndex:0];
+    
+//    self.outputLayer.shadowRadius = 25;
+//    self.outputLayer.shadowOpacity = 1;
+//    self.outputLayer.shadowColor = [colorInterpolator_ colorForFrame:self.currentFrame];
   self.outputLayer.fillColor = [colorInterpolator_ colorForFrame:self.currentFrame];
   self.outputLayer.opacity = [opacityInterpolator_ floatValueForFrame:self.currentFrame];
 }

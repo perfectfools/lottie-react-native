@@ -25,6 +25,7 @@
 @property (nonatomic, assign) CGFloat progress;
 @property (nonatomic, strong) NSDictionary *sourceJson;
 @property (nonatomic, strong) NSString *sourceName;
+@property (nonatomic, copy) NSNumber *blur;
 
 - (void)play;
 - (void)playFromFrame:(NSNumber *)startFrame
@@ -32,5 +33,6 @@
 - (void)reset;
 - (void)pause;
 - (void)resume;
+
 
 @end
