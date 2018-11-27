@@ -1,7 +1,8 @@
-Lottie for React Native, [iOS](https://github.com/airbnb/lottie-ios), and [Android](https://github.com/airbnb/lottie-android)
-===
+# Lottie for React Native, [iOS](https://github.com/airbnb/lottie-ios), and [Android](https://github.com/airbnb/lottie-android)
 
 [![npm Version](https://img.shields.io/npm/v/lottie-react-native.svg)](https://www.npmjs.com/package/lottie-react-native) [![License](https://img.shields.io/npm/l/lottie-react-native.svg)](https://www.npmjs.com/package/lottie-react-native) [![Build Status](https://travis-ci.org/airbnb/lottie-react-native.svg)](https://travis-ci.org/airbnb/lottie-react-native)
+
+Added support for Blur on Lottie shapes, strokes and fills, with amount param to react. (Android).
 
 Lottie component for React Native (iOS and Android)
 
@@ -16,7 +17,9 @@ Get started with Lottie by installing the node module with yarn or npm:
 ```
 yarn add lottie-react-native
 ```
+
 or
+
 ```
 npm i --save lottie-react-native
 ```
@@ -50,13 +53,7 @@ import LottieView from 'lottie-react-native';
 
 export default class BasicExample extends React.Component {
   render() {
-    return (
-      <LottieView
-        source={require('./animation.json')}
-        autoPlay
-        loop
-      />
-    );
+    return <LottieView source={require('./animation.json')} autoPlay loop />;
   }
 }
 ```
@@ -112,21 +109,26 @@ export default class BasicExample extends React.Component {
 
   render() {
     return (
-      <LottieView source={require('../path/to/animation.json')} progress={this.state.progress} />
+      <LottieView
+        source={require('../path/to/animation.json')}
+        blur={20}
+        progress={this.state.progress}
+      />
     );
   }
 }
 ```
 
 ## API
+
 You can find The full list of props and methods available in our [API document](https://github.com/airbnb/lottie-react-native/blob/master/docs/api.md). These are the most commont ones:
 
-| Prop | Description | Default |
-|---|---|---|
-|**`source`**| **Mandatory** - The source of animation. This must be a JS object of an animation, obtained (for example) with something like `require('../path/to/animation.json')`. This is needed in order to fix things. | *None* |
-|**`style`**| Style attributes for the view, as expected in a standard [`View`](https://facebook.github.io/react-native/docs/layout-props.html). | The `aspectRatio` exported by Bodymovin will be set. Also the `width` if you haven't provided a `width` or `height` |
-|**`loop`**| A boolean flag indicating whether or not the animation should loop. | `false` |
-|**`autoPlay`**| A boolean flag indicating whether or not the animation should start automatically when mounted. This only affects the imperative API. | `false` |
+| Prop           | Description                                                                                                                                                                                                  | Default                                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| **`source`**   | **Mandatory** - The source of animation. This must be a JS object of an animation, obtained (for example) with something like `require('../path/to/animation.json')`. This is needed in order to fix things. | _None_                                                                                                              |
+| **`style`**    | Style attributes for the view, as expected in a standard [`View`](https://facebook.github.io/react-native/docs/layout-props.html).                                                                           | The `aspectRatio` exported by Bodymovin will be set. Also the `width` if you haven't provided a `width` or `height` |
+| **`loop`**     | A boolean flag indicating whether or not the animation should loop.                                                                                                                                          | `false`                                                                                                             |
+| **`autoPlay`** | A boolean flag indicating whether or not the animation should start automatically when mounted. This only affects the imperative API.                                                                        | `false`                                                                                                             |
 
 [More...](https://github.com/airbnb/lottie-react-native/blob/master/docs/api.md)
 
@@ -136,14 +138,10 @@ View more documentation, FAQ, help, examples, and more at [airbnb.io/lottie](htt
 
 ![Example1](docs/gifs/Example1.gif)
 
-
 ![Example2](docs/gifs/Example2.gif)
-
 
 ![Example3](docs/gifs/Example3.gif)
 
-
 ![Community](docs/gifs/Community%202_3.gif)
-
 
 ![Example4](docs/gifs/Example4.gif)
