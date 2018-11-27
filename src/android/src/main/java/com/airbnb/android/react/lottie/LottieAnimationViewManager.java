@@ -60,7 +60,7 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
   }
 
   @Override
-  public void receiveCommand(final LottieAnimationView view, int commandId,final ReadableArray args) { //added final
+  public void receiveCommand(final LottieAnimationView view, int commandId, final ReadableArray args) {
     switch (commandId) {
       case COMMAND_PLAY: {
         new Handler(Looper.getMainLooper()).post(new Runnable() {
@@ -188,13 +188,13 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
     super.onAfterUpdateTransaction(view);
     getOrCreatePropertyManager(view).commitChanges();
   }
-/*
+
   @ReactProp(name = "blur")
   public void setBlurry(LottieAnimationView view, float blur) {
-   // view.setBlur(blur);
+    view.setBlur(blur);
     this.blur = blur;
   }
-*/
+
 
   private LottieAnimationViewPropertyManager getOrCreatePropertyManager(LottieAnimationView view) {
     LottieAnimationViewPropertyManager result = propManagersMap.get(view);

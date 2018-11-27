@@ -1,5 +1,6 @@
 package com.airbnb.android.react.lottie.animation.content;
 
+import android.graphics.BlurMaskFilter;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
@@ -30,6 +31,7 @@ public class FillContent
   private final Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
   private final BaseLayer layer;
   private final String name;
+
   private final List<PathContent> paths = new ArrayList<>();
   private final BaseKeyframeAnimation<Integer, Integer> colorAnimation;
   private final BaseKeyframeAnimation<Integer, Integer> opacityAnimation;
@@ -47,6 +49,11 @@ public class FillContent
     }
 
     path.setFillType(fill.getFillType());
+    if(lottieDrawable.getBlur() == 0){
+      paint.setMaskFilter(null);
+    } else {
+      paint.setMaskFilter(new BlurMaskFilter(lottieDrawable.getBlur(), BlurMaskFilter.Blur.NORMAL));
+    }
 
     colorAnimation = fill.getColor().createAnimation();
     colorAnimation.addUpdateListener(this);
@@ -73,12 +80,25 @@ public class FillContent
     return name;
   }
 
+  /*public void addColorFilter(@Nullable String layerName, @Nullable String contentName,
+                                       @Nullable ColorFilter colorFilter) {
+    paint.setColorFilter(colorFilter);
+  }*/
+/*
+  @Override public void setBlur(float blur) {
+    if(blur == 0){
+      paint.setMaskFilter(null);
+    } else {
+      paint.setMaskFilter(new BlurMaskFilter(blur, BlurMaskFilter.Blur.NORMAL));
+    }
+
+  }
+  */
   @Override public void draw(Canvas canvas, Matrix parentMatrix, int parentAlpha) {
     L.beginSection("FillContent#draw");
     paint.setColor(colorAnimation.getValue());
     int alpha = (int) ((parentAlpha / 255f * opacityAnimation.getValue() / 100f) * 255);
     paint.setAlpha(clamp(alpha, 0, 255));
-
     if (colorFilterAnimation != null) {
       paint.setColorFilter(colorFilterAnimation.getValue());
     }

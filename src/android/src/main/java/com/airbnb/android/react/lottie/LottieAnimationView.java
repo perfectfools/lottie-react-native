@@ -71,24 +71,24 @@ import com.airbnb.android.react.lottie.utils.Utils;
     Weak,
     Strong
   }
-
+  public float blur;
   private static final SparseArray<LottieComposition> RAW_RES_STRONG_REF_CACHE = new SparseArray<>();
   private static final SparseArray<WeakReference<LottieComposition>> RAW_RES_WEAK_REF_CACHE =
-          new SparseArray<>();
+      new SparseArray<>();
 
   private static final Map<String, LottieComposition> ASSET_STRONG_REF_CACHE = new HashMap<>();
   private static final Map<String, WeakReference<LottieComposition>> ASSET_WEAK_REF_CACHE =
-          new HashMap<>();
+      new HashMap<>();
 
   private final OnCompositionLoadedListener loadedListener =
-          new OnCompositionLoadedListener() {
-            @Override public void onCompositionLoaded(@Nullable LottieComposition composition) {
-              if (composition != null) {
-                setComposition(composition);
-              }
-              compositionLoader = null;
-            }
-          };
+      new OnCompositionLoadedListener() {
+        @Override public void onCompositionLoaded(@Nullable LottieComposition composition) {
+          if (composition != null) {
+            setComposition(composition);
+          }
+          compositionLoader = null;
+        }
+      };
 
   private final LottieDrawable lottieDrawable = new LottieDrawable();
   private CacheStrategy defaultCacheStrategy;
@@ -120,16 +120,16 @@ import com.airbnb.android.react.lottie.utils.Utils;
   private void init(@Nullable AttributeSet attrs) {
     TypedArray ta = getContext().obtainStyledAttributes(attrs, R.styleable.LottieAnimationView);
 
-    int cacheStrategyOrdinal = ta.getInt(
-            R.styleable.LottieAnimationView_lottie_cacheStrategy,
-            DEFAULT_CACHE_STRATEGY.ordinal());
+   int cacheStrategyOrdinal = ta.getInt(
+        R.styleable.LottieAnimationView_lottie_cacheStrategy,
+        DEFAULT_CACHE_STRATEGY.ordinal());
     this.defaultCacheStrategy = CacheStrategy.values()[cacheStrategyOrdinal];
     if (!isInEditMode()) {
       boolean hasRawRes = ta.hasValue(R.styleable.LottieAnimationView_lottie_rawRes);
       boolean hasFileName = ta.hasValue(R.styleable.LottieAnimationView_lottie_fileName);
       if (hasRawRes && hasFileName) {
         throw new IllegalArgumentException("lottie_rawRes and lottie_fileName cannot be used at " +
-                "the same time. Please use use only one at once.");
+            "the same time. Please use use only one at once.");
       } else if (hasRawRes) {
         int rawResId = ta.getResourceId(R.styleable.LottieAnimationView_lottie_rawRes, 0);
         if (rawResId != 0) {
@@ -142,6 +142,7 @@ import com.airbnb.android.react.lottie.utils.Utils;
         }
       }
     }
+
     if (ta.getBoolean(R.styleable.LottieAnimationView_lottie_autoPlay, false)) {
       wasAnimatingWhenDetached = true;
       autoPlay = true;
@@ -153,21 +154,21 @@ import com.airbnb.android.react.lottie.utils.Utils;
 
     if (ta.hasValue(R.styleable.LottieAnimationView_lottie_repeatMode)) {
       setRepeatMode(ta.getInt(R.styleable.LottieAnimationView_lottie_repeatMode,
-              LottieDrawable.RESTART));
+          LottieDrawable.RESTART));
     }
 
     if (ta.hasValue(R.styleable.LottieAnimationView_lottie_repeatCount)) {
       setRepeatCount(ta.getInt(R.styleable.LottieAnimationView_lottie_repeatCount,
-              LottieDrawable.INFINITE));
+          LottieDrawable.INFINITE));
     }
 
     setImageAssetsFolder(ta.getString(R.styleable.LottieAnimationView_lottie_imageAssetsFolder));
     setProgress(ta.getFloat(R.styleable.LottieAnimationView_lottie_progress, 0));
     enableMergePathsForKitKatAndAbove(ta.getBoolean(
-            R.styleable.LottieAnimationView_lottie_enableMergePathsForKitKatAndAbove, false));
+        R.styleable.LottieAnimationView_lottie_enableMergePathsForKitKatAndAbove, false));
     if (ta.hasValue(R.styleable.LottieAnimationView_lottie_colorFilter)) {
       SimpleColorFilter filter = new SimpleColorFilter(
-              ta.getColor(R.styleable.LottieAnimationView_lottie_colorFilter, Color.TRANSPARENT));
+          ta.getColor(R.styleable.LottieAnimationView_lottie_colorFilter, Color.TRANSPARENT));
       KeyPath keyPath = new KeyPath("**");
       LottieValueCallback<ColorFilter> callback = new LottieValueCallback<ColorFilter>(filter);
       addValueCallback(keyPath, LottieProperty.COLOR_FILTER, callback);
@@ -257,6 +258,7 @@ import com.airbnb.android.react.lottie.utils.Utils;
   }
 
   @Override protected void onAttachedToWindow() {
+  
     super.onAttachedToWindow();
     if (autoPlay && wasAnimatingWhenDetached) {
       playAnimation();
@@ -511,6 +513,11 @@ import com.airbnb.android.react.lottie.utils.Utils;
     requestLayout();
   }
 
+  public void setBlur(float blur){
+    lottieDrawable.setBlur(blur);
+    this.blur = blur;
+  }
+
   @Nullable public LottieComposition getComposition() {
     return composition;
   }
@@ -602,8 +609,8 @@ import com.airbnb.android.react.lottie.utils.Utils;
    * @see #setMaxProgress(float)
    */
   public void setMinAndMaxProgress(
-          @FloatRange(from = 0f, to = 1f) float minProgress,
-          @FloatRange(from = 0f, to = 1f) float maxProgress) {
+      @FloatRange(from = 0f, to = 1f) float minProgress,
+      @FloatRange(from = 0f, to = 1f) float maxProgress) {
     lottieDrawable.setMinAndMaxProgress(minProgress, maxProgress);
   }
 
@@ -765,7 +772,7 @@ import com.airbnb.android.react.lottie.utils.Utils;
    * Use this to manually set fonts.
    */
   public void setFontAssetDelegate(
-          @SuppressWarnings("NullableProblems") FontAssetDelegate assetDelegate) {
+      @SuppressWarnings("NullableProblems") FontAssetDelegate assetDelegate) {
     lottieDrawable.setFontAssetDelegate(assetDelegate);
   }
 
@@ -805,7 +812,7 @@ import com.airbnb.android.react.lottie.utils.Utils;
    * animationView.addValueCallback(yourKeyPath, LottieProperty.COLOR) { yourColor }
    */
   public <T> void addValueCallback(KeyPath keyPath, T property,
-                                   final SimpleLottieValueCallback<T> callback) {
+      final SimpleLottieValueCallback<T> callback) {
     lottieDrawable.addValueCallback(keyPath, property, new LottieValueCallback<T>() {
       @Override public T getValue(LottieFrameInfo<T> frameInfo) {
         return callback.getValue(frameInfo);
@@ -813,18 +820,18 @@ import com.airbnb.android.react.lottie.utils.Utils;
     });
   }
 
-  /**
-   * Set the scale on the current composition. The only cost of this function is re-rendering the
-   * current frame so you may call it frequent to scale something up or down.
-   *
-   * The smaller the animation is, the better the performance will be. You may find that scaling an
-   * animation down then rendering it in a larger ImageView and letting ImageView scale it back up
-   * with a scaleType such as centerInside will yield better performance with little perceivable
-   * quality loss.
-   *
-   * You can also use a fixed view width/height in conjunction with the normal ImageView
-   * scaleTypes centerCrop and centerInside.
-   */
+    /**
+     * Set the scale on the current composition. The only cost of this function is re-rendering the
+     * current frame so you may call it frequent to scale something up or down.
+     *
+     * The smaller the animation is, the better the performance will be. You may find that scaling an
+     * animation down then rendering it in a larger ImageView and letting ImageView scale it back up
+     * with a scaleType such as centerInside will yield better performance with little perceivable
+     * quality loss.
+     *
+     * You can also use a fixed view width/height in conjunction with the normal ImageView
+     * scaleTypes centerCrop and centerInside.
+     */
   public void setScale(float scale) {
     lottieDrawable.setScale(scale);
     if (getDrawable() == lottieDrawable) {
@@ -932,16 +939,16 @@ import com.airbnb.android.react.lottie.utils.Utils;
     }
 
     public static final Parcelable.Creator<SavedState> CREATOR =
-            new Parcelable.Creator<SavedState>() {
-              @Override
-              public SavedState createFromParcel(Parcel in) {
-                return new SavedState(in);
-              }
+        new Parcelable.Creator<SavedState>() {
+          @Override
+          public SavedState createFromParcel(Parcel in) {
+            return new SavedState(in);
+          }
 
-              @Override
-              public SavedState[] newArray(int size) {
-                return new SavedState[size];
-              }
-            };
+          @Override
+          public SavedState[] newArray(int size) {
+            return new SavedState[size];
+          }
+        };
   }
 }

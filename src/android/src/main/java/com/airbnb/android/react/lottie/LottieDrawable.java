@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Matrix;
+import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Typeface;
 import android.graphics.drawable.Animatable;
@@ -39,6 +40,8 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import android.graphics.BlurMaskFilter;
 
 /**
  * This can be used to show an lottie animation in any place that would normally take a drawable.
@@ -73,8 +76,8 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
   private boolean enableMergePaths;
   @Nullable private CompositionLayer compositionLayer;
   private int alpha = 255;
+  private float blur = 0;
   private boolean performanceTrackingEnabled;
-
   @IntDef({RESTART, REVERSE})
   @Retention(RetentionPolicy.SOURCE)
   public @interface RepeatMode {}
@@ -100,6 +103,8 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
       @Override public void onAnimationUpdate(ValueAnimator animation) {
         if (compositionLayer != null) {
           compositionLayer.setProgress(animator.getAnimatedValueAbsolute());
+
+
         }
       }
     });
@@ -691,6 +696,15 @@ public class LottieDrawable extends Drawable implements Drawable.Callback, Anima
     animator.pauseAnimation();
   }
 
+  public float getBlur() {
+    return this.blur;
+  }
+  public void setBlur(float blur) {
+    this.blur = blur;
+    // if (compositionLayer != null) {
+    //   compositionLayer.setBlur(blur);
+    // }
+  }
   @FloatRange(from = 0f, to = 1f)
   public float getProgress() {
     return animator.getAnimatedValueAbsolute();
