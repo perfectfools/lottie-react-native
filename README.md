@@ -29,8 +29,7 @@ npm i --save lottie-react-native
 Use `react-native link` to add the library to your project:
 
 ```
-react-native link lottie-ios
-react-native link lottie-react-native
+react-native link "DONT drag drop manually from node_modules"
 ```
 
 After this, open the Xcode project configuration and add the `Lottie.framework` as `Embedded Binaries`.

@@ -28,7 +28,7 @@
 #import "React/RCTUIManager.h"
 #endif
 
-#import <Lottie/Lottie.h>
+#import "PublicHeaders/Lottie.h"
 
 @implementation LRNAnimationViewManager
 
@@ -62,20 +62,21 @@ RCT_EXPORT_METHOD(play:(nonnull NSNumber *)reactTag
                   fromFrame:(nonnull NSNumber *) startFrame
                   toFrame:(nonnull NSNumber *) endFrame)
 {
-  [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
-    id view = viewRegistry[reactTag];
-    if (![view isKindOfClass:[LRNContainerView class]]) {
-      RCTLogError(@"Invalid view returned from registry, expecting LottieContainerView, got: %@", view);
-    } else {
-      LRNContainerView *lottieView = (LRNContainerView *)view;
-      if ([startFrame intValue] != -1 && [endFrame intValue] != -1) {
-        [lottieView playFromFrame:startFrame toFrame:endFrame];
-      } else {
-        [lottieView play];
-      }
-    }
-  }];
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
+        id view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[LRNContainerView class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting LottieContainerView, got: %@", view);
+        } else {
+            LRNContainerView *lottieView = (LRNContainerView *)view;
+            if ([startFrame intValue] != -1 && [endFrame intValue] != -1) {
+                [lottieView playFromFrame:startFrame toFrame:endFrame];
+            } else {
+                [lottieView play];
+            }
+        }
+    }];
 }
+
 
 RCT_EXPORT_METHOD(reset:(nonnull NSNumber *)reactTag)
 {
@@ -89,5 +90,32 @@ RCT_EXPORT_METHOD(reset:(nonnull NSNumber *)reactTag)
     }
   }];
 }
+
+RCT_EXPORT_METHOD(pause:(nonnull NSNumber *)reactTag)
+{
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
+        id view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[LRNContainerView class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting LottieContainerView, got: %@", view);
+        } else {
+            LRNContainerView *lottieView = (LRNContainerView *)view;
+            [lottieView pause];
+        }
+    }];
+}
+
+RCT_EXPORT_METHOD(resume:(nonnull NSNumber *)reactTag)
+{
+    [self.bridge.uiManager addUIBlock:^(__unused RCTUIManager *uiManager, NSDictionary<NSNumber *, UIView *> *viewRegistry) {
+        id view = viewRegistry[reactTag];
+        if (![view isKindOfClass:[LRNContainerView class]]) {
+            RCTLogError(@"Invalid view returned from registry, expecting LottieContainerView, got: %@", view);
+        } else {
+            LRNContainerView *lottieView = (LRNContainerView *)view;
+            [lottieView resume];
+        }
+    }];
+}
+
 
 @end

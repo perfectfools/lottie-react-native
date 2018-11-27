@@ -28,13 +28,7 @@
     "type": "git",
     "url": "git+https://github.com/airbnb/lottie-react-native.git"
   },
-  "keywords": [
-    "lottie",
-    "animation",
-    "react",
-    "react-native",
-    "keyframe"
-  ],
+  "keywords": ["lottie", "animation", "react", "react-native", "keyframe"],
   "author": "Leland Richardson <leland.richardson@airbnb.com>",
   "license": "Apache-2.0",
   "bugs": {
@@ -47,7 +41,7 @@
   },
   "dependencies": {
     "invariant": "^2.2.2",
-    "lottie-ios": "^2.5.0",
+    //"lottie-ios": "git@github.com:perfectfools/lottie-ios.git",
     "prop-types": "^15.5.10",
     "react-native-safe-module": "^1.1.0"
   },

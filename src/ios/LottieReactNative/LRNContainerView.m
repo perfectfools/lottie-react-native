@@ -65,6 +65,7 @@
   NSDictionary *json = [NSJSONSerialization JSONObjectWithData:jsonData
                                                        options:kNilOptions
                                                          error:nil];
+    
   [self replaceAnimationView:[LOTAnimationView animationFromJSON:json]];
 }
 

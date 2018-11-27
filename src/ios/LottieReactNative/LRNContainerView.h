@@ -16,7 +16,7 @@
 #import "React/RCTView.h"
 #endif
 
-#import <Lottie/Lottie.h>
+#import "PublicHeaders/Lottie.h"
 
 @interface LRNContainerView : RCTView
 

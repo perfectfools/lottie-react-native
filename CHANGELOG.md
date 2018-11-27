@@ -40,18 +40,13 @@
 - Moved eslint deps to devDeps
 - Expose hardwareAccelerationAndroid (#254)
 
-## 2.3.1 (December 5, 2017)
-
-- Bumped lottie-ios and lottie-android
-
 ## 2.3.0 (November 24, 2017)
 
 ### Features and Improvements
 
 - speed prop
 - enableMergePathsAndroidForKitKatAndAbove prop for Android KitKat and above
-- Bump Lottie-Android to 2.3.0
-- Bump Lottie-iOS to 2.1.4
+
 - Added resizeMode prop similar to <Image>
 - Added play(fromFrame, toFrame)
 - Removed the need for a style prop
@@ -71,7 +66,7 @@
 ## 1.0.2 - 1.0.4 (Feb 8, 2017)
 
 - Fix Android NativeModule name
-- Depend on lottie-ios through NPM in order to make static linking easier
+
 - Fix bad Lottie.xcodeproj reference for static linking
 - Fix iOS header import order for static linking
 
