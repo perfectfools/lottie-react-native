@@ -516,7 +516,6 @@ static NSString * const kCompContainerAnimationKey = @"play";
 
 - (void)addSubview:(nonnull LOTView *)view
     toKeypathLayer:(nonnull LOTKeypath *)keypath {
-    NSLog(@"%@", @"HEJ HOPP");
   [self _layoutAndForceUpdate];
   CGRect viewRect = view.frame;
   LOTView *wrapperView = [[LOTView alloc] initWithFrame:viewRect];
