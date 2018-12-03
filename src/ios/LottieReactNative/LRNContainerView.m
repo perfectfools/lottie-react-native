@@ -27,6 +27,12 @@
         [_animationView setBlurAmount:blur];
     }
 }
+-(void)setAlpha:(NSNumber *)alpha
+{
+    if (_animationView != nil) {
+        [_animationView setAlphaAmount:alpha];
+    }
+}
 
 - (void)reactSetFrame:(CGRect)frame
 {

@@ -74,11 +74,13 @@ typedef void (^LOTAnimationCompletionBlock)(BOOL animationFinished);
 @property (nonatomic, assign) BOOL initBlur;
 @property (nonatomic, copy) NSString *blurType;
 @property (nonatomic, assign) NSNumber *blur;
+@property (nonatomic, assign) CGFloat *alpha;
 
 @property (nonatomic, strong) BlurEffectWithAmount *blurEffect;
 @property (nonatomic, strong) UIVisualEffectView *blurEffectView;
 
 -(void)setBlurAmount:(nonnull NSNumber *)blur;
+-(void)setAlphaAmount:(nonnull CGFloat *)alpha;
 
 - (void)updateBlurEffect;
 /* 

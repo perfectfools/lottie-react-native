@@ -134,6 +134,12 @@ static NSString * const kCompContainerAnimationKey = @"play";
         }
     }
 }
+- (void)setAlphaAmount:(CGFloat *)alpha
+{
+    if(self.blur && self.initBlur){
+      self.blurEffectView.alpha = alpha;
+    }
+}
 - (UIBlurEffectStyle)blurEffectStyle
 {
     if ([self.blurType isEqual: @"xlight"]) return UIBlurEffectStyleExtraLight;
