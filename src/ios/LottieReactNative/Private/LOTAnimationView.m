@@ -137,7 +137,7 @@ static NSString * const kCompContainerAnimationKey = @"play";
 - (void)setAlphaAmount:(CGFloat *)alpha
 {
     if(self.blur && self.initBlur){
-      self.blurEffectView.alpha = alpha;
+      self.blurEffectView.alpha = *(alpha);
     }
 }
 - (UIBlurEffectStyle)blurEffectStyle

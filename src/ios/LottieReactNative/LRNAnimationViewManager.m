@@ -59,7 +59,7 @@ RCT_EXPORT_VIEW_PROPERTY(loop, BOOL);
 RCT_EXPORT_VIEW_PROPERTY(speed, CGFloat);
 RCT_EXPORT_VIEW_PROPERTY(blurType, NSString);
 RCT_EXPORT_VIEW_PROPERTY(blur, NSNumber);
-RCT_EXPORT_VIEW_PROPERTY(alpha, CGFloat);
+RCT_EXPORT_VIEW_PROPERTY(alphaValue, CGFloat);
 
 RCT_EXPORT_METHOD(play:(nonnull NSNumber *)reactTag
                   fromFrame:(nonnull NSNumber *) startFrame

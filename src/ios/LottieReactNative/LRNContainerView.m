@@ -27,10 +27,10 @@
         [_animationView setBlurAmount:blur];
     }
 }
--(void)setAlpha:(NSNumber *)alpha
+-(void)setAlphaValue:(CGFloat *)alphaValue
 {
     if (_animationView != nil) {
-        [_animationView setAlphaAmount:alpha];
+        [_animationView setAlphaAmount:alphaValue];
     }
 }
 
