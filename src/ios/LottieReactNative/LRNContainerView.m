@@ -27,10 +27,12 @@
         [_animationView setBlurAmount:blur];
     }
 }
--(void)setAlphaValue:(CGFloat *)alphaValue
+
+-(void)setSetAlpha:(CGFloat)setAlpha
 {
+    self.useAlpha = setAlpha;
     if (_animationView != nil) {
-        [_animationView setAlphaAmount:alphaValue];
+        [_animationView alphaValue:self.useAlpha];
     }
 }
 
@@ -130,12 +132,14 @@
   [self addSubview: next];
   [_animationView reactSetFrame:self.frame];
   [_animationView setContentMode:contentMode];
+    
   [self applyProperties];
 }
 
 - (void)applyProperties {
   _animationView.animationProgress = _progress;
   _animationView.animationSpeed = _speed;
+    
   _animationView.loopAnimation = _loop;
 }
 

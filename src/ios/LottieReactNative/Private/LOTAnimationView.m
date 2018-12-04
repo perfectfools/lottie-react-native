@@ -21,6 +21,7 @@ static NSString * const kCompContainerAnimationKey = @"play";
   LOTCompositionContainer *_compContainer;
   NSNumber *_playRangeStartFrame;
   NSNumber *_playRangeEndFrame;
+  CGFloat _storedAlpha;
   CGFloat _playRangeStartProgress;
   CGFloat _playRangeEndProgress;
   NSBundle *_bundle;
@@ -112,7 +113,7 @@ static NSString * const kCompContainerAnimationKey = @"play";
     self.blurEffectView = [[UIVisualEffectView alloc] init];
     self.blurEffectView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.blurEffectView.frame = self.frame;
-    
+    self.blurEffectView.alpha = _storedAlpha;
     self.blurType = @"light";
     [self updateBlurEffect];
     
@@ -125,6 +126,7 @@ static NSString * const kCompContainerAnimationKey = @"play";
     if(!self.blur){
         self.blur = @0;
     }
+    
     if (blur && ![self.blur isEqualToNumber:blur]) {
         self.blur = blur;
         if(self.initBlur){
@@ -134,11 +136,10 @@ static NSString * const kCompContainerAnimationKey = @"play";
         }
     }
 }
-- (void)setAlphaAmount:(CGFloat *)alpha
+
+- (void)alphaValue:(CGFloat)alpha
 {
-    if(self.blur && self.initBlur){
-      self.blurEffectView.alpha = *(alpha);
-    }
+    _storedAlpha = alpha;
 }
 - (UIBlurEffectStyle)blurEffectStyle
 {
@@ -198,6 +199,7 @@ static NSString * const kCompContainerAnimationKey = @"play";
   _loopAnimation = NO;
   _autoReverseAnimation = NO;
   _playRangeEndFrame = nil;
+  _storedAlpha = 1.0f;
   _playRangeStartFrame = nil;
   _playRangeEndProgress = 0;
   _playRangeStartProgress = 0;

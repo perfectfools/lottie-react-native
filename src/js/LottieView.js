@@ -69,6 +69,7 @@ const defaultProps = {
   progress: 0,
   speed: 1,
   loop: true,
+  setAlpha: 1,
   autoPlay: false,
   autoSize: false,
   enableMergePathsAndroidForKitKatAndAbove: false,

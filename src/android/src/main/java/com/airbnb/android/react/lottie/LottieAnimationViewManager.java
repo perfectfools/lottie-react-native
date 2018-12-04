@@ -195,8 +195,8 @@ class LottieAnimationViewManager extends SimpleViewManager<LottieAnimationView> 
     this.blur = blur;
   }
   
-  @ReactProp(name = "alpha")
-  public void setAlpha() {
+  @ReactProp(name = "setAlpha")
+  public void addAlpha() {
   }
 
   private LottieAnimationViewPropertyManager getOrCreatePropertyManager(LottieAnimationView view) {

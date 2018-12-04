@@ -26,7 +26,8 @@
 @property (nonatomic, strong) NSDictionary *sourceJson;
 @property (nonatomic, strong) NSString *sourceName;
 @property (nonatomic, copy) NSNumber *blur;
-@property (nonatomic, assign) CGFloat *alphaValue;
+@property (nonatomic, assign) CGFloat useAlpha;
+@property (nonatomic, assign) CGFloat setAlpha;
 
 - (void)play;
 - (void)playFromFrame:(NSNumber *)startFrame
