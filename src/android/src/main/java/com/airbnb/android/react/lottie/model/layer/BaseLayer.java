@@ -34,8 +34,8 @@ import java.util.List;
 
 public abstract class BaseLayer
     implements DrawingContent, BaseKeyframeAnimation.AnimationListener, KeyPathElement {
-  private static final int SAVE_FLAGS = Canvas.CLIP_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG |
-      Canvas.MATRIX_SAVE_FLAG;
+  //private static final int SAVE_FLAGS = Canvas.CLIP_SAVE_FLAG | Canvas.CLIP_TO_LAYER_SAVE_FLAG |
+    //  Canvas.MATRIX_SAVE_FLAG;
 
   private static boolean hasLoggedIntersectMasks = false;
 
@@ -161,13 +161,13 @@ public abstract class BaseLayer
 
   @SuppressLint("WrongConstant")
   private void saveLayerCompat(Canvas canvas, RectF rect, Paint paint) { 
-    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+    //if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
       // This method was deprecated in API level 26 and not recommented since 22, but its
       // 2-parameter replacement is only available starting at API level 21.
-      canvas.saveLayer(rect, paint, SAVE_FLAGS);
-    } else {
+      //canvas.saveLayer(rect, paint, SAVE_FLAGS);
+    //} else {
       canvas.saveLayer(rect, paint);
-    }
+    //}
   }
 
   public void addAnimation(BaseKeyframeAnimation<?, ?> newAnimation) {

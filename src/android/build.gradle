@@ -24,8 +24,8 @@ android {
 }
 
 dependencies {
-  compile "com.android.support:appcompat-v7:26.0.2"
-  provided "com.facebook.react:react-native:0.57.0"
+  //compile "com.android.support:appcompat-v7:26.0.2"
+  provided "com.facebook.react:react-native:+"
   //testCompile 'junit:junit:4.12'
   //testCompile "org.robolectric:robolectric:3.4.2"
 }
